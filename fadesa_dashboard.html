@@ -612,11 +612,8 @@
             document.getElementById('filter-distrito').addEventListener('change', updateFilters);
             document.getElementById('filter-regimen').addEventListener('change', updateFilters);
             document.getElementById('filter-estado-decl').addEventListener('change', updateFilters);
-            document.getElementById('filter-mes-inicio').addEventListener('change', updateFilters);
-            document.getElementById('filter-mes-fin').addEventListener('change', updateFilters);
             document.getElementById('btn-reset').addEventListener('click', resetFilters);
-            document.getElementById('btn-apply-filters').addEventListener('click', applyFilters);
-
+            
             // Time series metric buttons
             document.querySelectorAll('[id^="ts-metric-"]').forEach(btn => {
                 btn.addEventListener('click', function() {
