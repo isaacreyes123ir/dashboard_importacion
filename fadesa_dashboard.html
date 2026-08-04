@@ -1012,9 +1012,8 @@
                         title: 'Año', 
                         thickness: 15, 
                         len: 0.7,
-                        tickmode: 'array',
-                        tickvals: [...new Set(sample.map(d => d.Ano))].sort(),
-                        ticktext: [...new Set(sample.map(d => d.Ano))].sort().map(String)
+                        dtick: 1,           // Fuerza saltos de 1 en 1
+                        tickformat: 'd'     // Formato de número entero sin comas
                     },
                     opacity: 0.6,
                     line: { width: 0 }
