@@ -587,7 +587,7 @@
             const regimenes = [...new Set(data.map(d => d.Regimen).filter(Boolean))].sort();
             populateSelect('filter-regimen', regimenes.map(r => ({ value: r, label: r })));
 
-            const estados = [...new Set(data.map(d => d.Estado_Declaracion).filter(Boolean))].sort();
+            const estados = [...new Set(data.map(d => d.Estado_Mercancia).filter(Boolean))].sort();
             populateSelect('filter-estado-decl', estados.map(e => ({ value: e, label: e })));
 
             document.getElementById('filter-year').addEventListener('change', updateFilters);
@@ -659,7 +659,7 @@
                 if (currentFilters.incoterms[0] !== 'all' && String(d.Incoterm) !== currentFilters.incoterms[0]) return false;
                 if (currentFilters.distritos[0] !== 'all' && String(d.Distrito) !== currentFilters.distritos[0]) return false;
                 if (currentFilters.regimenes[0] !== 'all' && String(d.Regimen) !== currentFilters.regimenes[0]) return false;
-                if (currentFilters.estados[0] !== 'all' && String(d.Estado_Declaracion) !== currentFilters.estados[0]) return false;
+                if (currentFilters.estados[0] !== 'all' && String(d.Estado_Mercancia) !== currentFilters.estados[0]) return false;
                 if (currentFilters.producto && !String(d.Producto).toLowerCase().includes(currentFilters.producto)) return false;
                 return true;
             });
