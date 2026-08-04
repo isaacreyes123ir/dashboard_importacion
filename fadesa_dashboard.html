@@ -995,9 +995,9 @@
 
         // Scatter
         function renderScatter() {
-            if (!rawData || !rawData.scatter_sample) return;
+            if (!filteredData || filteredData.length === 0) return;
 
-            const sample = rawData.scatter_sample.slice(0, 2000);
+            const sample = filteredData.slice(0, 2000);
             const trace = {
                 x: sample.map(d => d.Peso_Neto_Kg),
                 y: sample.map(d => d.FOB),
