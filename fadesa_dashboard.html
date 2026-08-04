@@ -663,7 +663,54 @@
                 if (currentFilters.producto && !String(d.Producto).toLowerCase().includes(currentFilters.producto)) return false;
                 return true;
             });
+            
+            updateFilterOptions(); // <--- Llama a la cascada aquí
             renderAll();
+        }
+
+        function getValidOptions(excludeFilter) {
+            return (rawData.detail_data || []).filter(d => {
+                if (excludeFilter !== 'years' && currentFilters.years[0] !== 'all' && String(d.Ano) !== currentFilters.years[0]) return false;
+                if (excludeFilter !== 'vias' && currentFilters.vias[0] !== 'all' && String(d.Via) !== currentFilters.vias[0]) return false;
+                if (excludeFilter !== 'paises' && currentFilters.paises[0] !== 'all' && String(d.Pais_Origen) !== currentFilters.paises[0]) return false;
+                if (excludeFilter !== 'incoterms' && currentFilters.incoterms[0] !== 'all' && String(d.Incoterm) !== currentFilters.incoterms[0]) return false;
+                if (excludeFilter !== 'distritos' && currentFilters.distritos[0] !== 'all' && String(d.Distrito) !== currentFilters.distritos[0]) return false;
+                if (excludeFilter !== 'regimenes' && currentFilters.regimenes[0] !== 'all' && String(d.Regimen) !== currentFilters.regimenes[0]) return false;
+                if (excludeFilter !== 'estados' && currentFilters.estados[0] !== 'all' && String(d.Estado_Mercancia) !== currentFilters.estados[0]) return false;
+                if (currentFilters.producto && !String(d.Producto).toLowerCase().includes(currentFilters.producto)) return false;
+                return true;
+            });
+        }
+
+        function updateFilterOptions() {
+            const selects = {
+                'filter-year': { key: 'years', field: 'Ano' },
+                'filter-via': { key: 'vias', field: 'Via' },
+                'filter-pais': { key: 'paises', field: 'Pais_Origen' },
+                'filter-incoterm': { key: 'incoterms', field: 'Incoterm' },
+                'filter-distrito': { key: 'distritos', field: 'Distrito' },
+                'filter-regimen': { key: 'regimenes', field: 'Regimen' },
+                'filter-estado-decl': { key: 'estados', field: 'Estado_Mercancia' }
+            };
+
+            for (const [id, meta] of Object.entries(selects)) {
+                const currentVal = document.getElementById(id).value;
+                const validData = getValidOptions(meta.key);
+                
+                let uniqueVals = [...new Set(validData.map(d => d[meta.field]).filter(Boolean))].sort();
+                if (meta.key === 'years') uniqueVals = uniqueVals.sort((a, b) => b - a);
+                
+                populateSelect(id, uniqueVals.map(v => ({ value: v, label: v })));
+                
+                if (currentVal !== 'all') {
+                    if (uniqueVals.map(String).includes(String(currentVal))) {
+                        document.getElementById(id).value = currentVal;
+                    } else {
+                        document.getElementById(id).value = 'all';
+                        currentFilters[meta.key] = ['all'];
+                    }
+                }
+            }
         }
 
         function resetFilters() {
