@@ -541,26 +541,49 @@
         // ==================== DATA LOADING ====================
         let rawData = null;
         let filteredData = null;
-        let currentFilters = {
-            years: ['all'], vias: ['all'], paises: ['all'], incoterms: ['all'],
-            distritos: ['all'], regimenes: ['all'], estados: ['all'],
-            producto: '', mesInicio: 1, mesFin: 12
-        };
-        let tsMetric = 'FOB';
+        let dupontData = null; // Nueva variable
 
         async function loadData() {
             showLoading();
             try {
                 const response = await fetch('fadesa_dashboard_data.json?v=' + Date.now());
                 rawData = await response.json();
+                
+                // Cargar datos DuPont
+                const dupontResponse = await fetch('analisis.json?v=' + Date.now());
+                dupontData = await dupontResponse.json();
+
                 initializeFilters();
                 applyFilters();
             } catch (error) {
                 console.error('Error loading data:', error);
-                document.getElementById('kpi-grid').innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-muted);">Error cargando datos. Verifique que fadesa_dashboard_data.json existe.</div>';
+                document.getElementById('kpi-grid').innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-muted);">Error cargando datos.</div>';
             }
         }
 
+        function renderDuPont() {
+            if (!dupontData) return;
+            const container = document.getElementById('table-dupont');
+            const anioSeleccionado = currentFilters.years[0];
+            
+            // Definir qué años mostrar
+            const añosDisponibles = ['2019', '2020', '2021', '2022', '2023', '2024', '2025'];
+            const añosAMostrar = anioSeleccionado === 'all' ? añosDisponibles : [anioSeleccionado];
+
+            let html = '<table class="data-table"><thead><tr><th>Indicador</th>';
+            añosAMostrar.forEach(y => html += `<th class="number">${y}</th>`);
+            html += '</tr></thead><tbody>';
+
+            dupontData.forEach(row => {
+                html += `<tr><td style="font-weight:600;">${row.Indicadores}</td>`;
+                añosAMostrar.forEach(y => {
+                    html += `<td class="number">${row[y]}</td>`;
+                });
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
         function showLoading() {
             document.getElementById('kpi-grid').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando datos...</div>';
         }
