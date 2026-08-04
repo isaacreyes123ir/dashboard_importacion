@@ -1234,11 +1234,27 @@
 
         // Tables
         function renderTables() {
-            renderTable('table-top-importadores', rawData.top_importadores, ['Importador', 'Peso_Neto_Kg', 'FOB', 'CIF', 'Registros'], ['Importador', 'Peso Neto (Kg)', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
-            renderTable('table-top-marcas', rawData.top_marcas, ['Marca', 'FOB', 'CIF', 'Registros'], ['Marca', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
-            renderTable('table-top-subpartidas', rawData.top_subpartidas, ['Subpartida', 'Peso_Neto_Kg', 'FOB', 'CIF', 'Registros'], ['Subpartida', 'Peso Neto (Kg)', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
-            renderTable('table-top-transportistas', rawData.top_transportistas, ['Transportista', 'FOB', 'CIF', 'Registros'], ['Transportista', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
-            renderTable('table-top-consignatarios', rawData.top_consignatarios, ['Consignatario', 'FOB', 'CIF', 'Registros'], ['Consignatario', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
+            if (!filteredData || filteredData.length === 0) return;
+
+            const agruparDatos = (campo) => {
+                const agg = {};
+                filteredData.forEach(d => {
+                    let k = String(d[campo] || 'Sin dato').trim();
+                    if (campo === 'Subpartida') k = k.replace(/^'/, '');
+                    if (!agg[k]) agg[k] = { [campo]: k, FOB: 0, CIF: 0, Peso_Neto_Kg: 0, Registros: 0 };
+                    agg[k].FOB += (d.FOB || 0);
+                    agg[k].CIF += (d.CIF || 0);
+                    agg[k].Peso_Neto_Kg += (d.Peso_Neto_Kg || 0);
+                    agg[k].Registros += 1;
+                });
+                return Object.values(agg).sort((a, b) => b.FOB - a.FOB);
+            };
+
+            renderTable('table-top-importadores', agruparDatos('Importador'), ['Importador', 'Peso_Neto_Kg', 'FOB', 'CIF', 'Registros'], ['Importador', 'Peso Neto (Kg)', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
+            renderTable('table-top-marcas', agruparDatos('Marca'), ['Marca', 'FOB', 'CIF', 'Registros'], ['Marca', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
+            renderTable('table-top-subpartidas', agruparDatos('Subpartida'), ['Subpartida', 'Peso_Neto_Kg', 'FOB', 'CIF', 'Registros'], ['Subpartida', 'Peso Neto (Kg)', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
+            renderTable('table-top-transportistas', agruparDatos('Transportista'), ['Transportista', 'FOB', 'CIF', 'Registros'], ['Transportista', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
+            renderTable('table-top-consignatarios', agruparDatos('Consignatario'), ['Consignatario', 'FOB', 'CIF', 'Registros'], ['Consignatario', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
         }
 
         function renderTable(containerId, data, keys, headers, formats = {}) {
