@@ -686,71 +686,40 @@
 
         function updateFilters() {
             currentFilters = {
-                years: getSelectedValues('filter-year'),
-                vias: getSelectedValues('filter-via'),
-                paises: getSelectedValues('filter-pais'),
-                incoterms: getSelectedValues('filter-incoterm'),
-                producto: document.getElementById('filter-producto').value.toLowerCase(),
-                mesInicio: parseInt(document.getElementById('filter-mes-inicio').value),
-                mesFin: parseInt(document.getElementById('filter-mes-fin').value),
-                distritos: getSelectedValues('filter-distrito'),
-                regimenes: getSelectedValues('filter-regimen'),
-                estados: getSelectedValues('filter-estado-decl')
+                year: document.getElementById('filter-year').value,
+                via: document.getElementById('filter-via').value,
+                pais: document.getElementById('filter-pais').value,
+                incoterm: document.getElementById('filter-incoterm').value,
+                distrito: document.getElementById('filter-distrito').value,
+                regimen: document.getElementById('filter-regimen').value,
+                estado: document.getElementById('filter-estado-decl').value,
+                producto: document.getElementById('filter-producto').value.toLowerCase()
             };
             applyFilters();
         }
 
         function applyFilters() {
             if (!rawData) return;
-
             filteredData = (rawData.detail_data || []).filter(d => {
-                if (currentFilters.years[0] !== 'all' && !currentFilters.years.includes(d.Ano)) return false;
-                if (currentFilters.vias[0] !== 'all' && !currentFilters.vias.includes(d.Via)) return false;
-                if (currentFilters.paises[0] !== 'all' && !currentFilters.paises.includes(d.Pais_Origen)) return false;
-                if (currentFilters.incoterms[0] !== 'all' && !currentFilters.incoterms.includes(d.Incoterm)) return false;
-                if (currentFilters.distritos[0] !== 'all' && !currentFilters.distritos.includes(d.Distrito)) return false;
-                if (currentFilters.regimenes[0] !== 'all' && !currentFilters.regimenes.includes(d.Regimen)) return false;
-                if (currentFilters.estados[0] !== 'all' && !currentFilters.estados.includes(d.Estado_Declaracion)) return false;
-                if (currentFilters.producto && !d.Producto.toLowerCase().includes(currentFilters.producto)) return false;
-                if (d.Mes < currentFilters.mesInicio || d.Mes > currentFilters.mesFin) return false;
+                if (currentFilters.year !== 'all' && String(d.Ano) !== currentFilters.year) return false;
+                if (currentFilters.via !== 'all' && String(d.Via) !== currentFilters.via) return false;
+                if (currentFilters.pais !== 'all' && String(d.Pais_Origen) !== currentFilters.pais) return false;
+                if (currentFilters.incoterm !== 'all' && String(d.Incoterm) !== currentFilters.incoterm) return false;
+                if (currentFilters.distrito !== 'all' && String(d.Distrito) !== currentFilters.distrito) return false;
+                if (currentFilters.regimen !== 'all' && String(d.Regimen) !== currentFilters.regimen) return false;
+                if (currentFilters.estado !== 'all' && String(d.Estado_Declaracion) !== currentFilters.estado) return false;
+                if (currentFilters.producto && !String(d.Producto).toLowerCase().includes(currentFilters.producto)) return false;
                 return true;
             });
-
             renderAll();
         }
 
         function resetFilters() {
-            currentFilters = {
-                years: ['all'],
-                vias: ['all'],
-                paises: ['all'],
-                incoterms: ['all'],
-                producto: '',
-                mesInicio: 1,
-                mesFin: 12,
-                distritos: ['all'],
-                regimenes: ['all'],
-                estados: ['all']
-            };
-
-            document.getElementById('filter-year').value = 'all';
-            document.getElementById('filter-via').value = 'all';
-            document.getElementById('filter-pais').value = 'all';
-            document.getElementById('filter-incoterm').value = 'all';
-            document.getElementById('filter-producto').value = '';
-            document.getElementById('filter-distrito').value = 'all';
-            document.getElementById('filter-regimen').value = 'all';
-            document.getElementById('filter-estado-decl').value = 'all';
-            document.getElementById('filter-mes-inicio').value = '1';
-            document.getElementById('filter-mes-fin').value = '12';
-
-            // Clear multi-select
             ['filter-year', 'filter-via', 'filter-pais', 'filter-incoterm', 'filter-distrito', 'filter-regimen', 'filter-estado-decl'].forEach(id => {
-                const sel = document.getElementById(id);
-                Array.from(sel.options).forEach(opt => opt.selected = opt.value === 'all');
+                document.getElementById(id).value = 'all';
             });
-
-            applyFilters();
+            document.getElementById('filter-producto').value = '';
+            updateFilters();
         }
 
         function debounce(fn, delay) {
