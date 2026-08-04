@@ -763,64 +763,42 @@
 
         // Time Series
         function renderTimeSeries() {
-            if (!rawData || !rawData.timeseries) return;
+            if (!filteredData || filteredData.length === 0) return;
 
-            // Use full timeseries data, apply same filters
-            const data = rawData.timeseries.filter(d => {
-                if (currentFilters.years[0] !== 'all' && !currentFilters.years.includes(d.Ano)) return false;
-                if (currentFilters.mesInicio > 1 || currentFilters.mesFin < 12) {
-                    if (d.Mes < currentFilters.mesInicio || d.Mes > currentFilters.mesFin) return false;
-                }
-                // Other filters (via, pais, etc.) not applicable to timeseries aggregates
-                return true;
+            const agg = {};
+            filteredData.forEach(d => {
+                const key = `${d.Ano}-${String(d.Mes).padStart(2, '0')}`;
+                if (!agg[key]) agg[key] = { x: key, FOB: 0, CIF: 0, COUNT: 0, PESO: 0, num: d.Ano * 100 + d.Mes };
+                agg[key].FOB += (d.FOB || 0);
+                agg[key].CIF += (d.CIF || 0);
+                agg[key].COUNT += 1;
+                agg[key].PESO += (d.Peso_Neto_Kg || 0);
             });
 
-            if (data.length === 0) return;
-
-            const sorted = data.sort((a, b) => a.Periodo_Num - b.Periodo_Num);
-            const x = sorted.map(d => `${d.Ano}-${String(d.Mes).padStart(2, '0')}`);
-            // Map tsMetric to actual data keys
-            const metricMap = { COUNT: 'Registros', PESO: 'Peso_Neto_Kg' };
-            const metricKey = metricMap[tsMetric] || tsMetric;
+            const sorted = Object.values(agg).sort((a, b) => a.num - b.num);
+            const x = sorted.map(d => d.x);
+            const metricKey = tsMetric === 'COUNT' ? 'COUNT' : (tsMetric === 'PESO' ? 'PESO' : tsMetric);
             const y = sorted.map(d => d[metricKey]);
 
             const metricLabels = { FOB: 'FOB (USD)', CIF: 'CIF (USD)', COUNT: 'Registros', PESO: 'Peso Neto (Kg)' };
             const metricColors = { FOB: '#1e3a8a', CIF: '#059669', COUNT: '#7c3aed', PESO: '#ea580c' };
 
             const trace = {
-                x: x,
-                y: y,
-                type: 'scatter',
-                mode: 'lines+markers',
+                x: x, y: y, type: 'scatter', mode: 'lines+markers',
                 line: { color: metricColors[tsMetric], width: 2 },
                 marker: { size: 5, color: metricColors[tsMetric] },
-                fill: 'tozeroy',
-                fillcolor: metricColors[tsMetric] + '33',
+                fill: 'tozeroy', fillcolor: metricColors[tsMetric] + '33',
                 name: metricLabels[tsMetric],
                 hovertemplate: '%{x}<br>%{y:,.0f}<extra></extra>'
             };
 
             const layout = {
                 margin: { t: 20, r: 20, b: 50, l: 70 },
-                paper_bgcolor: 'rgba(0,0,0,0)',
-                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
                 font: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') || '#1a1a2e' },
-                xaxis: {
-                    title: 'Periodo',
-                    showgrid: true,
-                    gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb',
-                    tickangle: -45,
-                    tickfont: { size: 10 }
-                },
-                yaxis: {
-                    title: metricLabels[tsMetric],
-                    showgrid: true,
-                    gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb',
-                    tickformat: ',.0f',
-                    tickfont: { size: 10 }
-                },
-                hovermode: 'x unified',
-                showlegend: false
+                xaxis: { title: 'Periodo', showgrid: true, gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb', tickangle: -45, tickfont: { size: 10 } },
+                yaxis: { title: metricLabels[tsMetric], showgrid: true, gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb', tickformat: ',.0f', tickfont: { size: 10 } },
+                hovermode: 'x unified', showlegend: false
             };
 
             Plotly.newPlot('chart-timeseries', [trace], layout, { responsive: true, displayModeBar: false });
