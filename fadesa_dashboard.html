@@ -539,24 +539,15 @@
         let rawData = null;
         let filteredData = null;
         let currentFilters = {
-            years: ['all'],
-            vias: ['all'],
-            paises: ['all'],
-            incoterms: ['all'],
-            producto: '',
-            mesInicio: 1,
-            mesFin: 12,
-            distritos: ['all'],
-            regimenes: ['all'],
-            estados: ['all']
+            years: ['all'], vias: ['all'], paises: ['all'], incoterms: ['all'],
+            distritos: ['all'], regimenes: ['all'], estados: ['all'],
+            producto: '', mesInicio: 1, mesFin: 12
         };
         let tsMetric = 'FOB';
 
-        // Load data
         async function loadData() {
             showLoading();
             try {
-                // Add timestamp to prevent caching
                 const response = await fetch('fadesa_dashboard_data.json?v=' + Date.now());
                 rawData = await response.json();
                 initializeFilters();
@@ -575,35 +566,30 @@
         function initializeFilters() {
             if (!rawData) return;
 
-            // Years
             const years = rawData.kpis.anios.sort((a, b) => b - a);
             populateSelect('filter-year', years.map(y => ({ value: y, label: y })));
 
-            // Vías
-            const vias = [...new Set(rawData.timeseries.map(d => d.Via).filter(Boolean))].sort();
+            // Leer de detail_data para obtener todas las opciones
+            const data = rawData.detail_data || [];
+
+            const vias = [...new Set(data.map(d => d.Via).filter(Boolean))].sort();
             populateSelect('filter-via', vias.map(v => ({ value: v, label: v })));
 
-            // Países
-            const paises = [...new Set(rawData.timeseries.map(d => d.Pais_Origen).filter(Boolean))].sort();
+            const paises = [...new Set(data.map(d => d.Pais_Origen).filter(Boolean))].sort();
             populateSelect('filter-pais', paises.slice(0, 50).map(p => ({ value: p, label: p })));
 
-            // Incoterms
-            const incoterms = [...new Set(rawData.timeseries.map(d => d.Incoterm).filter(Boolean))].sort();
+            const incoterms = [...new Set(data.map(d => d.Incoterm).filter(Boolean))].sort();
             populateSelect('filter-incoterm', incoterms.map(i => ({ value: i, label: i })));
 
-            // Distritos
-            const distritos = [...new Set(rawData.timeseries.map(d => d.Distrito).filter(Boolean))].sort();
+            const distritos = [...new Set(data.map(d => d.Distrito).filter(Boolean))].sort();
             populateSelect('filter-distrito', distritos.map(d => ({ value: d, label: d })));
 
-            // Régimenes
-            const regimenes = [...new Set(rawData.timeseries.map(d => d.Regimen).filter(Boolean))].sort();
+            const regimenes = [...new Set(data.map(d => d.Regimen).filter(Boolean))].sort();
             populateSelect('filter-regimen', regimenes.map(r => ({ value: r, label: r })));
 
-            // Estados declaración
-            const estados = [...new Set(rawData.timeseries.map(d => d.Estado_Declaracion).filter(Boolean))].sort();
+            const estados = [...new Set(data.map(d => d.Estado_Declaracion).filter(Boolean))].sort();
             populateSelect('filter-estado-decl', estados.map(e => ({ value: e, label: e })));
 
-            // Event listeners
             document.getElementById('filter-year').addEventListener('change', updateFilters);
             document.getElementById('filter-via').addEventListener('change', updateFilters);
             document.getElementById('filter-pais').addEventListener('change', updateFilters);
@@ -613,8 +599,7 @@
             document.getElementById('filter-regimen').addEventListener('change', updateFilters);
             document.getElementById('filter-estado-decl').addEventListener('change', updateFilters);
             document.getElementById('btn-reset').addEventListener('click', resetFilters);
-            
-            // Time series metric buttons
+
             document.querySelectorAll('[id^="ts-metric-"]').forEach(btn => {
                 btn.addEventListener('click', function() {
                     document.querySelectorAll('[id^="ts-metric-"]').forEach(b => b.classList.remove('primary'));
@@ -624,7 +609,6 @@
                 });
             });
 
-            // Detail tabs
             document.querySelectorAll('#detail-tabs .tab').forEach(tab => {
                 tab.addEventListener('click', function() {
                     document.querySelectorAll('#detail-tabs .tab').forEach(t => t.classList.remove('active'));
@@ -638,22 +622,6 @@
 
         function populateSelect(id, options) {
             const select = document.getElementById(id);
-            const currentValue = select.value;
-            const isMulti = select.hasAttribute('multiple');
-
-            // Map select ID to currentFilters key
-            const keyMap = {
-                'filter-year': 'years',
-                'filter-via': 'vias',
-                'filter-pais': 'paises',
-                'filter-incoterm': 'incoterms',
-                'filter-distrito': 'distritos',
-                'filter-regimen': 'regimenes',
-                'filter-estado-decl': 'estados'
-            };
-            const filterKey = keyMap[id];
-
-            // Keep "all" option
             const allOption = select.querySelector('option[value="all"]');
             select.innerHTML = '';
             if (allOption) select.appendChild(allOption);
@@ -664,33 +632,20 @@
                 option.textContent = opt.label;
                 select.appendChild(option);
             });
-
-            if (isMulti && filterKey && currentFilters[filterKey]) {
-                // Restore selections if they exist in new options
-                Array.from(select.options).forEach(opt => {
-                    if (opt.value !== 'all' && currentFilters[filterKey].includes(opt.value)) {
-                        opt.selected = true;
-                    }
-                });
-            }
-        }
-
-        function getSelectedValues(selectId) {
-            const select = document.getElementById(selectId);
-            const values = Array.from(select.selectedOptions).map(o => o.value);
-            return values.includes('all') || values.length === 0 ? ['all'] : values;
         }
 
         function updateFilters() {
             currentFilters = {
-                year: document.getElementById('filter-year').value,
-                via: document.getElementById('filter-via').value,
-                pais: document.getElementById('filter-pais').value,
-                incoterm: document.getElementById('filter-incoterm').value,
-                distrito: document.getElementById('filter-distrito').value,
-                regimen: document.getElementById('filter-regimen').value,
-                estado: document.getElementById('filter-estado-decl').value,
-                producto: document.getElementById('filter-producto').value.toLowerCase()
+                years: [document.getElementById('filter-year').value],
+                vias: [document.getElementById('filter-via').value],
+                paises: [document.getElementById('filter-pais').value],
+                incoterms: [document.getElementById('filter-incoterm').value],
+                distritos: [document.getElementById('filter-distrito').value],
+                regimenes: [document.getElementById('filter-regimen').value],
+                estados: [document.getElementById('filter-estado-decl').value],
+                producto: document.getElementById('filter-producto').value.toLowerCase(),
+                mesInicio: 1, 
+                mesFin: 12
             };
             applyFilters();
         }
@@ -698,13 +653,13 @@
         function applyFilters() {
             if (!rawData) return;
             filteredData = (rawData.detail_data || []).filter(d => {
-                if (currentFilters.year !== 'all' && String(d.Ano) !== currentFilters.year) return false;
-                if (currentFilters.via !== 'all' && String(d.Via) !== currentFilters.via) return false;
-                if (currentFilters.pais !== 'all' && String(d.Pais_Origen) !== currentFilters.pais) return false;
-                if (currentFilters.incoterm !== 'all' && String(d.Incoterm) !== currentFilters.incoterm) return false;
-                if (currentFilters.distrito !== 'all' && String(d.Distrito) !== currentFilters.distrito) return false;
-                if (currentFilters.regimen !== 'all' && String(d.Regimen) !== currentFilters.regimen) return false;
-                if (currentFilters.estado !== 'all' && String(d.Estado_Declaracion) !== currentFilters.estado) return false;
+                if (currentFilters.years[0] !== 'all' && String(d.Ano) !== currentFilters.years[0]) return false;
+                if (currentFilters.vias[0] !== 'all' && String(d.Via) !== currentFilters.vias[0]) return false;
+                if (currentFilters.paises[0] !== 'all' && String(d.Pais_Origen) !== currentFilters.paises[0]) return false;
+                if (currentFilters.incoterms[0] !== 'all' && String(d.Incoterm) !== currentFilters.incoterms[0]) return false;
+                if (currentFilters.distritos[0] !== 'all' && String(d.Distrito) !== currentFilters.distritos[0]) return false;
+                if (currentFilters.regimenes[0] !== 'all' && String(d.Regimen) !== currentFilters.regimenes[0]) return false;
+                if (currentFilters.estados[0] !== 'all' && String(d.Estado_Declaracion) !== currentFilters.estados[0]) return false;
                 if (currentFilters.producto && !String(d.Producto).toLowerCase().includes(currentFilters.producto)) return false;
                 return true;
             });
