@@ -571,21 +571,25 @@
         }
 
         function renderDuPont() {
-            if (!dupontData) return;
+            if (!dupontData || dupontData.length === 0) return;
             const container = document.getElementById('table-dupont');
             const anioSeleccionado = currentFilters.years[0];
             
-            // Definir qué años mostrar
             const añosDisponibles = ['2019', '2020', '2021', '2022', '2023', '2024', '2025'];
             const añosAMostrar = anioSeleccionado === 'all' ? añosDisponibles : [anioSeleccionado];
 
-            let html = '<table class="data-table"><thead><tr><th>Indicador</th>';
-            añosAMostrar.forEach(y => html += `<th class="number">${y}</th>`);
+            let html = '<table class="data-table"><thead><tr><th>Año</th>';
+            
+            // Generar los encabezados (Indicadores)
+            dupontData.forEach(row => {
+                html += `<th class="number">${row.Indicadores}</th>`;
+            });
             html += '</tr></thead><tbody>';
 
-            dupontData.forEach(row => {
-                html += `<tr><td style="font-weight:600;">${row.Indicadores}</td>`;
-                añosAMostrar.forEach(y => {
+            // Generar las filas (Años)
+            añosAMostrar.forEach(y => {
+                html += `<tr><td style="font-weight:600;">${y}</td>`;
+                dupontData.forEach(row => {
                     html += `<td class="number">${row[y]}</td>`;
                 });
                 html += '</tr>';
