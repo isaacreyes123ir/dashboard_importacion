@@ -541,7 +541,14 @@
         // ==================== DATA LOADING ====================
         let rawData = null;
         let filteredData = null;
-        let dupontData = null; // Nueva variable
+        let dupontData = null;
+        
+        let currentFilters = {
+            years: ['all'], vias: ['all'], paises: ['all'], incoterms: ['all'],
+            distritos: ['all'], regimenes: ['all'], estados: ['all'],
+            producto: '', mesInicio: 1, mesFin: 12
+        };
+        let tsMetric = 'FOB';
 
         async function loadData() {
             showLoading();
