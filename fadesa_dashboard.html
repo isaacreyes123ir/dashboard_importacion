@@ -738,10 +738,8 @@
             const totalRegistros = filtersActive && hasFiltered ? filteredData.length : rawData.kpis.total_registros;
 
             // Use pre-computed unique counts when no filters active
-            const uniquePaises = filtersActive && hasFiltered
-                ? new Set(filteredData.map(d => d.Pais_Origen).filter(Boolean)).size
-                : rawData.kpis.paises_unicos;
-            const uniqueProductos = rawData.kpis.subpartidas_unicas || new Set(data.map(d => String(d.Subpartida || '').replace(/^'/, '')).filter(Boolean)).size;
+            const uniquePaises = new Set((filtersActive && hasFiltered ? filteredData : data).map(d => String(d.Pais_Origen || '').trim()).filter(Boolean)).size;
+            const uniqueProductos = new Set((filtersActive && hasFiltered ? filteredData : data).map(d => String(d.Subpartida || '').replace(/^'/, '').trim()).filter(Boolean)).size;
 
             const kpis = [
                 { label: 'Total Registros', value: totalRegistros.toLocaleString(), class: '' },
