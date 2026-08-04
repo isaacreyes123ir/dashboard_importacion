@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard FADESA 2019-2025 - Auditoría de Importaciones</title>
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --text: #1a1a2e;
+            --text-muted: #6b7280;
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --accent: #059669;
+            --border: #e5e7eb;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            --radius: 8px;
+            --transition: all 0.2s ease;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --surface: #1e293b;
+                --text: #f1f5f9;
+                --text-muted: #94a3b8;
+                --primary: #60a5fa;
+                --primary-light: #93c5fd;
+                --accent: #34d399;
+                --border: #334155;
+                --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+                --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.3), 0 4px 6px -2px rgba(0,0,0,0.2);
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+        .header-content {
+            max-width: 1920px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .header .subtitle {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+        .filters {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .filter-group label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        .filter-group select, .filter-group input {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.875rem;
+            min-width: 160px;
+            cursor: pointer;
+        }
+        .filter-group select:focus, .filter-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.15);
+        }
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            padding: 1.5rem 2rem;
+            max-width: 1920px;
+            margin: 0 auto;
+        }
+        .kpi-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        .kpi-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+        .kpi-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .kpi-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .kpi-value.primary { color: var(--primary); }
+        .kpi-value.accent { color: var(--accent); }
+        .kpi-delta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        .main-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 1.5rem;
+            padding: 0 1.5rem 1.5rem;
+            max-width: 1920px;
+            margin: 0 auto;
+        }
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                position: static;
+            }
+        }
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            font-weight: 600;
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .panel-header .icon {
+            font-size: 1rem;
+        }
+        .panel-content {
+            padding: 1rem 1.25rem;
+        }
+        .chart-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            min-height: 400px;
+        }
+        .chart-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .chart-header h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .chart-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .btn {
+            padding: 0.375rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface);
+            color: var(--text);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn:hover {
+            background: var(--bg);
+            border-color: var(--primary);
+        }
+        .btn.primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+        .btn.primary:hover {
+            background: var(--primary-light);
+        }
+        .chart-wrapper {
+            padding: 1rem;
+            position: relative;
+        }
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1rem;
+            overflow-x: auto;
+        }
+        .tab {
+            padding: 0.625rem 1rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .tab:hover {
+            color: var(--text);
+        }
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        .tab-panel {
+            display: none;
+        }
+        .tab-panel.active {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+        }
+        .data-table th, .data-table td {
+            padding: 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        .data-table th {
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.65rem;
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            z-index: 1;
+        }
+        .data-table tr:hover td {
+            background: var(--bg);
+        }
+        .data-table .number {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.125rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+        .badge-primary { background: #dbeafe; color: #1e40af; }
+        .badge-accent { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        @media (prefers-color-scheme: dark) {
+            .badge-primary { background: #1e3a5f; color: #93c5fd; }
+            .badge-accent { background: #064e3b; color: #6ee7b7; }
+            .badge-warning { background: #78350f; color: #fcd34d; }
+            .badge-danger { background: #7f1d1d; color: #fca5a5; }
+        }
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            color: var(--text-muted);
+        }
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 1rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 1rem;
+        }
+        @media (max-width: 900px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-label { color: var(--text-muted); font-size: 0.8rem; }
+        .stat-value { font-weight: 600; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div>
+                <h1>Dashboard FADESA 2019-2025</h1>
+                <div class="subtitle">Auditoría de Importaciones | 126,766 registros | $564.1M FOB</div>
+            </div>
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Año</label>
+                    <select id="filter-year" multiple>
+                        <option value="all" selected>Todos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Vía</label>
+                    <select id="filter-via" multiple>
+                        <option value="all" selected>Todas</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>País Origen</label>
+                    <select id="filter-pais" multiple>
+                        <option value="all" selected>Todos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Incoterm</label>
+                    <select id="filter-incoterm" multiple>
+                        <option value="all" selected>Todos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Producto</label>
+                    <input type="text" id="filter-producto" placeholder="Buscar producto...">
+                </div>
+                <button class="btn" id="btn-reset">Limpiar filtros</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="kpi-grid" id="kpi-grid"></div>
+
+    <div class="main-grid">
+        <aside class="sidebar">
+            <div class="panel">
+                <div class="panel-header">
+                    <span>Filtros Rápidos</span>
+                </div>
+                <div class="panel-content">
+                    <div class="filter-group" style="margin-bottom: 1rem;">
+                        <label>Rango de fechas</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <select id="filter-mes-inicio" style="flex: 1;">
+                                <option value="1">Enero</option>
+                                <option value="2">Febrero</option>
+                                <option value="3">Marzo</option>
+                                <option value="4">Abril</option>
+                                <option value="5">Mayo</option>
+                                <option value="6">Junio</option>
+                                <option value="7">Julio</option>
+                                <option value="8">Agosto</option>
+                                <option value="9">Septiembre</option>
+                                <option value="10">Octubre</option>
+                                <option value="11">Noviembre</option>
+                                <option value="12">Diciembre</option>
+                            </select>
+                            <select id="filter-mes-fin" style="flex: 1;">
+                                <option value="12" selected>Diciembre</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="filter-group" style="margin-bottom: 1rem;">
+                        <label>Distrito</label>
+                        <select id="filter-distrito" multiple>
+                            <option value="all" selected>Todos</option>
+                        </select>
+                    </div>
+                    <div class="filter-group" style="margin-bottom: 1rem;">
+                        <label>Régimen</label>
+                        <select id="filter-regimen" multiple>
+                            <option value="all" selected>Todos</option>
+                        </select>
+                    </div>
+                    <div class="filter-group" style="margin-bottom: 1rem;">
+                        <label>Estado Declaración</label>
+                        <select id="filter-estado-decl" multiple>
+                            <option value="all" selected>Todos</option>
+                        </select>
+                    </div>
+                    <button class="btn primary" id="btn-apply-filters" style="width: 100%; margin-top: 0.5rem;">Aplicar Filtros</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span>Top 10 Países de Origen</span>
+                </div>
+                <div class="panel-content">
+                    <div id="chart-top-paises" style="height: 300px;"></div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span>Top 10 Subpartidas por FOB</span>
+                </div>
+                <div class="panel-content">
+                    <div id="chart-top-productos" style="height: 380px;"></div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span>Distribución por Vía</span>
+                </div>
+                <div class="panel-content">
+                    <div id="chart-via" style="height: 250px;"></div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span>Distribución por Incoterm</span>
+                </div>
+                <div class="panel-content">
+                    <div id="chart-incoterm" style="height: 250px;"></div>
+                </div>
+            </div>
+        </aside>
+
+        <main>
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>Evolución Temporal de Importaciones</h3>
+                    <div class="chart-actions">
+                        <button class="btn" id="ts-metric-fob" data-metric="FOB">FOB (USD)</button>
+                        <button class="btn" id="ts-metric-cif" data-metric="CIF">CIF (USD)</button>
+                        <button class="btn" id="ts-metric-count" data-metric="COUNT">Registros</button>
+                        <button class="btn" id="ts-metric-peso" data-metric="PESO">Peso (Kg)</button>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <div id="chart-timeseries" style="height: 450px;"></div>
+                </div>
+            </div>
+
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>FOB por Año y Mes</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <div id="chart-heatmap" style="height: 380px;"></div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>FOB vs Peso Neto (muestra)</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <div id="chart-scatter" style="height: 380px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>Análisis Detallado</h3>
+                    <div class="chart-actions">
+                        <div class="tab-container" id="detail-tabs">
+                            <button class="tab active" data-tab="top-importadores">Top Importadores</button>
+                            <button class="tab" data-tab="top-marcas">Top Marcas</button>
+                            <button class="tab" data-tab="top-subpartidas">Top Subpartidas</button>
+                            <button class="tab" data-tab="top-transportistas">Transportistas</button>
+                            <button class="tab" data-tab="top-consignatarios">Consignatarios</button>
+                            <button class="tab" data-tab="paises-year">Países x Año</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <div class="tab-panel active" id="panel-top-importadores">
+                        <div id="table-top-importadores" style="overflow-x: auto;"></div>
+                    </div>
+                    <div class="tab-panel" id="panel-top-marcas">
+                        <div id="table-top-marcas" style="overflow-x: auto;"></div>
+                    </div>
+                    <div class="tab-panel" id="panel-top-subpartidas">
+                        <div id="table-top-subpartidas" style="overflow-x: auto;"></div>
+                    </div>
+                    <div class="tab-panel" id="panel-top-transportistas">
+                        <div id="table-top-transportistas" style="overflow-x: auto;"></div>
+                    </div>
+                    <div class="tab-panel" id="panel-top-consignatarios">
+                        <div id="table-top-consignatarios" style="overflow-x: auto;"></div>
+                    </div>
+                    <div class="tab-panel" id="panel-paises-year">
+                        <div id="chart-paises-year" style="height: 400px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>Distribución por Distrito</h3>
+                </div>
+                <div class="chart-wrapper">
+                    <div id="chart-distrito" style="height: 350px;"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ==================== DATA LOADING ====================
+        let rawData = null;
+        let filteredData = null;
+        let currentFilters = {
+            years: ['all'],
+            vias: ['all'],
+            paises: ['all'],
+            incoterms: ['all'],
+            producto: '',
+            mesInicio: 1,
+            mesFin: 12,
+            distritos: ['all'],
+            regimenes: ['all'],
+            estados: ['all']
+        };
+        let tsMetric = 'FOB';
+
+        // Load data
+        async function loadData() {
+            showLoading();
+            try {
+                // Add timestamp to prevent caching
+                const response = await fetch('fadesa_dashboard_data.json?v=' + Date.now());
+                rawData = await response.json();
+                initializeFilters();
+                applyFilters();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('kpi-grid').innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-muted);">Error cargando datos. Verifique que fadesa_dashboard_data.json existe.</div>';
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('kpi-grid').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando datos...</div>';
+        }
+
+        // ==================== FILTER INITIALIZATION ====================
+        function initializeFilters() {
+            if (!rawData) return;
+
+            // Years
+            const years = rawData.kpis.anios.sort((a, b) => b - a);
+            populateSelect('filter-year', years.map(y => ({ value: y, label: y })));
+
+            // Vías
+            const vias = [...new Set(rawData.timeseries.map(d => d.Via).filter(Boolean))].sort();
+            populateSelect('filter-via', vias.map(v => ({ value: v, label: v })));
+
+            // Países
+            const paises = [...new Set(rawData.timeseries.map(d => d.Pais_Origen).filter(Boolean))].sort();
+            populateSelect('filter-pais', paises.slice(0, 50).map(p => ({ value: p, label: p })));
+
+            // Incoterms
+            const incoterms = [...new Set(rawData.timeseries.map(d => d.Incoterm).filter(Boolean))].sort();
+            populateSelect('filter-incoterm', incoterms.map(i => ({ value: i, label: i })));
+
+            // Distritos
+            const distritos = [...new Set(rawData.timeseries.map(d => d.Distrito).filter(Boolean))].sort();
+            populateSelect('filter-distrito', distritos.map(d => ({ value: d, label: d })));
+
+            // Régimenes
+            const regimenes = [...new Set(rawData.timeseries.map(d => d.Regimen).filter(Boolean))].sort();
+            populateSelect('filter-regimen', regimenes.map(r => ({ value: r, label: r })));
+
+            // Estados declaración
+            const estados = [...new Set(rawData.timeseries.map(d => d.Estado_Declaracion).filter(Boolean))].sort();
+            populateSelect('filter-estado-decl', estados.map(e => ({ value: e, label: e })));
+
+            // Event listeners
+            document.getElementById('filter-year').addEventListener('change', updateFilters);
+            document.getElementById('filter-via').addEventListener('change', updateFilters);
+            document.getElementById('filter-pais').addEventListener('change', updateFilters);
+            document.getElementById('filter-incoterm').addEventListener('change', updateFilters);
+            document.getElementById('filter-producto').addEventListener('input', debounce(updateFilters, 300));
+            document.getElementById('filter-distrito').addEventListener('change', updateFilters);
+            document.getElementById('filter-regimen').addEventListener('change', updateFilters);
+            document.getElementById('filter-estado-decl').addEventListener('change', updateFilters);
+            document.getElementById('filter-mes-inicio').addEventListener('change', updateFilters);
+            document.getElementById('filter-mes-fin').addEventListener('change', updateFilters);
+            document.getElementById('btn-reset').addEventListener('click', resetFilters);
+            document.getElementById('btn-apply-filters').addEventListener('click', applyFilters);
+
+            // Time series metric buttons
+            document.querySelectorAll('[id^="ts-metric-"]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('[id^="ts-metric-"]').forEach(b => b.classList.remove('primary'));
+                    this.classList.add('primary');
+                    tsMetric = this.dataset.metric;
+                    renderTimeSeries();
+                });
+            });
+
+            // Detail tabs
+            document.querySelectorAll('#detail-tabs .tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('#detail-tabs .tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById('panel-' + this.dataset.tab).classList.add('active');
+                    if (this.dataset.tab === 'paises-year') renderPaisesYearChart();
+                });
+            });
+        }
+
+        function populateSelect(id, options) {
+            const select = document.getElementById(id);
+            const currentValue = select.value;
+            const isMulti = select.hasAttribute('multiple');
+
+            // Map select ID to currentFilters key
+            const keyMap = {
+                'filter-year': 'years',
+                'filter-via': 'vias',
+                'filter-pais': 'paises',
+                'filter-incoterm': 'incoterms',
+                'filter-distrito': 'distritos',
+                'filter-regimen': 'regimenes',
+                'filter-estado-decl': 'estados'
+            };
+            const filterKey = keyMap[id];
+
+            // Keep "all" option
+            const allOption = select.querySelector('option[value="all"]');
+            select.innerHTML = '';
+            if (allOption) select.appendChild(allOption);
+
+            options.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt.value;
+                option.textContent = opt.label;
+                select.appendChild(option);
+            });
+
+            if (isMulti && filterKey && currentFilters[filterKey]) {
+                // Restore selections if they exist in new options
+                Array.from(select.options).forEach(opt => {
+                    if (opt.value !== 'all' && currentFilters[filterKey].includes(opt.value)) {
+                        opt.selected = true;
+                    }
+                });
+            }
+        }
+
+        function getSelectedValues(selectId) {
+            const select = document.getElementById(selectId);
+            const values = Array.from(select.selectedOptions).map(o => o.value);
+            return values.includes('all') || values.length === 0 ? ['all'] : values;
+        }
+
+        function updateFilters() {
+            currentFilters = {
+                years: getSelectedValues('filter-year'),
+                vias: getSelectedValues('filter-via'),
+                paises: getSelectedValues('filter-pais'),
+                incoterms: getSelectedValues('filter-incoterm'),
+                producto: document.getElementById('filter-producto').value.toLowerCase(),
+                mesInicio: parseInt(document.getElementById('filter-mes-inicio').value),
+                mesFin: parseInt(document.getElementById('filter-mes-fin').value),
+                distritos: getSelectedValues('filter-distrito'),
+                regimenes: getSelectedValues('filter-regimen'),
+                estados: getSelectedValues('filter-estado-decl')
+            };
+            applyFilters();
+        }
+
+        function applyFilters() {
+            if (!rawData) return;
+
+            filteredData = (rawData.detail_data || []).filter(d => {
+                if (currentFilters.years[0] !== 'all' && !currentFilters.years.includes(d.Ano)) return false;
+                if (currentFilters.vias[0] !== 'all' && !currentFilters.vias.includes(d.Via)) return false;
+                if (currentFilters.paises[0] !== 'all' && !currentFilters.paises.includes(d.Pais_Origen)) return false;
+                if (currentFilters.incoterms[0] !== 'all' && !currentFilters.incoterms.includes(d.Incoterm)) return false;
+                if (currentFilters.distritos[0] !== 'all' && !currentFilters.distritos.includes(d.Distrito)) return false;
+                if (currentFilters.regimenes[0] !== 'all' && !currentFilters.regimenes.includes(d.Regimen)) return false;
+                if (currentFilters.estados[0] !== 'all' && !currentFilters.estados.includes(d.Estado_Declaracion)) return false;
+                if (currentFilters.producto && !d.Producto.toLowerCase().includes(currentFilters.producto)) return false;
+                if (d.Mes < currentFilters.mesInicio || d.Mes > currentFilters.mesFin) return false;
+                return true;
+            });
+
+            renderAll();
+        }
+
+        function resetFilters() {
+            currentFilters = {
+                years: ['all'],
+                vias: ['all'],
+                paises: ['all'],
+                incoterms: ['all'],
+                producto: '',
+                mesInicio: 1,
+                mesFin: 12,
+                distritos: ['all'],
+                regimenes: ['all'],
+                estados: ['all']
+            };
+
+            document.getElementById('filter-year').value = 'all';
+            document.getElementById('filter-via').value = 'all';
+            document.getElementById('filter-pais').value = 'all';
+            document.getElementById('filter-incoterm').value = 'all';
+            document.getElementById('filter-producto').value = '';
+            document.getElementById('filter-distrito').value = 'all';
+            document.getElementById('filter-regimen').value = 'all';
+            document.getElementById('filter-estado-decl').value = 'all';
+            document.getElementById('filter-mes-inicio').value = '1';
+            document.getElementById('filter-mes-fin').value = '12';
+
+            // Clear multi-select
+            ['filter-year', 'filter-via', 'filter-pais', 'filter-incoterm', 'filter-distrito', 'filter-regimen', 'filter-estado-decl'].forEach(id => {
+                const sel = document.getElementById(id);
+                Array.from(sel.options).forEach(opt => opt.selected = opt.value === 'all');
+            });
+
+            applyFilters();
+        }
+
+        function debounce(fn, delay) {
+            let timeoutId;
+            return (...args) => {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => fn.apply(this, args), delay);
+            };
+        }
+
+        // ==================== RENDERING ====================
+        function renderAll() {
+            renderKPIs();
+            renderTimeSeries();
+            renderHeatmap();
+            renderScatter();
+            renderTopPaises();
+            renderTopProductos();
+            renderVia();
+            renderIncoterm();
+            renderDistrito();
+            renderTables();
+        }
+
+        // KPIs
+        function renderKPIs() {
+            if (!rawData) return;
+
+            const hasFiltered = filteredData && filteredData.length > 0;
+            const data = hasFiltered ? filteredData : (rawData.detail_data || []);
+
+            // Check if any ACTUAL filter is applied (not default 'all')
+            const filtersActive = currentFilters.years[0] !== 'all' ||
+                currentFilters.vias[0] !== 'all' ||
+                currentFilters.paises[0] !== 'all' ||
+                currentFilters.incoterms[0] !== 'all' ||
+                currentFilters.distritos[0] !== 'all' ||
+                currentFilters.regimenes[0] !== 'all' ||
+                currentFilters.estados[0] !== 'all' ||
+                currentFilters.producto !== '' ||
+                currentFilters.mesInicio > 1 ||
+                currentFilters.mesFin < 12;
+
+            // Use pre-computed KPIs when no filters active (detail_data is only a 30k sample)
+            // Otherwise compute from filtered data
+            let totalFOB, totalCIF, totalFlete, totalSeguro, totalPeso, totalCant;
+            if (filtersActive && hasFiltered) {
+                totalFOB = filteredData.reduce((sum, d) => sum + (d.FOB || 0), 0);
+                totalCIF = filteredData.reduce((sum, d) => sum + (d.CIF || 0), 0);
+                totalFlete = filteredData.reduce((sum, d) => sum + (d.Flete || 0), 0);
+                totalSeguro = filteredData.reduce((sum, d) => sum + (d.Seguro || 0), 0);
+                totalPeso = filteredData.reduce((sum, d) => sum + (d.Peso_Neto_Kg || 0), 0);
+                totalCant = filteredData.reduce((sum, d) => sum + (d.Cantidad || 0), 0);
+            } else {
+                totalFOB = rawData.kpis.total_fob;
+                totalCIF = rawData.kpis.total_cif;
+                totalFlete = rawData.kpis.total_flete;
+                totalSeguro = rawData.kpis.total_seguro;
+                totalPeso = rawData.kpis.total_peso_kg;
+                totalCant = rawData.kpis.total_cantidad;
+            }
+
+            // Total registros: usar total real (126,766) sin filtros, o filtrados con filtros activos
+            const totalRegistros = filtersActive && hasFiltered ? filteredData.length : rawData.kpis.total_registros;
+
+            // Use pre-computed unique counts when no filters active
+            const uniquePaises = filtersActive && hasFiltered
+                ? new Set(filteredData.map(d => d.Pais_Origen).filter(Boolean)).size
+                : rawData.kpis.paises_unicos;
+            const uniqueProductos = rawData.kpis.subpartidas_unicas || new Set(data.map(d => String(d.Subpartida || '').replace(/^'/, '')).filter(Boolean)).size;
+
+            const kpis = [
+                { label: 'Total Registros', value: totalRegistros.toLocaleString(), class: '' },
+                { label: 'FOB Total (USD)', value: formatCurrency(totalFOB), class: 'primary' },
+                { label: 'CIF Total (USD)', value: formatCurrency(totalCIF), class: 'primary' },
+                { label: 'Flete Total (USD)', value: formatCurrency(totalFlete), class: '' },
+                { label: 'Seguro Total (USD)', value: formatCurrency(totalSeguro), class: '' },
+                { label: 'Peso Neto Total (Kg)', value: formatNumber(totalPeso), class: 'accent' },
+                { label: 'Cantidad Total', value: formatNumber(totalCant), class: '' },
+                { label: 'Países de Origen', value: uniquePaises.toLocaleString(), class: '' },
+                { label: 'Subpartidas Únicas', value: uniqueProductos.toLocaleString(), class: '' }
+            ];
+
+            document.getElementById('kpi-grid').innerHTML = kpis.map(kpi => `
+                <div class="kpi-card">
+                    <div class="kpi-label">${kpi.label}</div>
+                    <div class="kpi-value ${kpi.class}">${kpi.value}</div>
+                </div>
+            `).join('');
+        }
+
+        // Time Series
+        function renderTimeSeries() {
+            if (!rawData || !rawData.timeseries) return;
+
+            // Use full timeseries data, apply same filters
+            const data = rawData.timeseries.filter(d => {
+                if (currentFilters.years[0] !== 'all' && !currentFilters.years.includes(d.Ano)) return false;
+                if (currentFilters.mesInicio > 1 || currentFilters.mesFin < 12) {
+                    if (d.Mes < currentFilters.mesInicio || d.Mes > currentFilters.mesFin) return false;
+                }
+                // Other filters (via, pais, etc.) not applicable to timeseries aggregates
+                return true;
+            });
+
+            if (data.length === 0) return;
+
+            const sorted = data.sort((a, b) => a.Periodo_Num - b.Periodo_Num);
+            const x = sorted.map(d => `${d.Ano}-${String(d.Mes).padStart(2, '0')}`);
+            // Map tsMetric to actual data keys
+            const metricMap = { COUNT: 'Registros', PESO: 'Peso_Neto_Kg' };
+            const metricKey = metricMap[tsMetric] || tsMetric;
+            const y = sorted.map(d => d[metricKey]);
+
+            const metricLabels = { FOB: 'FOB (USD)', CIF: 'CIF (USD)', COUNT: 'Registros', PESO: 'Peso Neto (Kg)' };
+            const metricColors = { FOB: '#1e3a8a', CIF: '#059669', COUNT: '#7c3aed', PESO: '#ea580c' };
+
+            const trace = {
+                x: x,
+                y: y,
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: { color: metricColors[tsMetric], width: 2 },
+                marker: { size: 5, color: metricColors[tsMetric] },
+                fill: 'tozeroy',
+                fillcolor: metricColors[tsMetric] + '33',
+                name: metricLabels[tsMetric],
+                hovertemplate: '%{x}<br>%{y:,.0f}<extra></extra>'
+            };
+
+            const layout = {
+                margin: { t: 20, r: 20, b: 50, l: 70 },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') || '#1a1a2e' },
+                xaxis: {
+                    title: 'Periodo',
+                    showgrid: true,
+                    gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb',
+                    tickangle: -45,
+                    tickfont: { size: 10 }
+                },
+                yaxis: {
+                    title: metricLabels[tsMetric],
+                    showgrid: true,
+                    gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb',
+                    tickformat: ',.0f',
+                    tickfont: { size: 10 }
+                },
+                hovermode: 'x unified',
+                showlegend: false
+            };
+
+            Plotly.newPlot('chart-timeseries', [trace], layout, { responsive: true, displayModeBar: false });
+        }
+
+        // Heatmap
+        function renderHeatmap() {
+            if (!filteredData || filteredData.length === 0) return;
+
+            const years = [...new Set(filteredData.map(d => d.Ano))].sort();
+            const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            const z = [];
+            const text = [];
+
+            years.forEach(year => {
+                const row = [];
+                const rowText = [];
+                months.forEach((month, mIdx) => {
+                    const val = filteredData
+                        .filter(d => d.Ano === year && d.Mes === mIdx + 1)
+                        .reduce((sum, d) => sum + (d.FOB || 0), 0);
+                    row.push(val);
+                    rowText.push(formatCurrency(val));
+                });
+                z.push(row);
+                text.push(rowText);
+            });
+
+            const trace = {
+                z: z,
+                x: months,
+                y: years.map(String).reverse(),
+                type: 'heatmap',
+                colorscale: 'Viridis',
+                showscale: true,
+                colorbar: { title: 'FOB (USD)', thickness: 15, len: 0.7 },
+                
+                
+                
+                hovertemplate: 'Año: %{y}<br>Mes: %{x}<br>FOB: %{z:$,.0f}<extra></extra>'
+            };
+
+            const layout = {
+                margin: { t: 20, r: 20, b: 40, l: 50 },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') || '#1a1a2e' },
+                xaxis: { side: 'top', tickfont: { size: 11 } },
+                yaxis: { autorange: 'reversed', tickfont: { size: 11 } }
+            };
+
+            Plotly.newPlot('chart-heatmap', [trace], layout, { responsive: true, displayModeBar: false });
+        }
+
+        // Scatter
+        function renderScatter() {
+            if (!rawData || !rawData.scatter_sample) return;
+
+            const sample = rawData.scatter_sample.slice(0, 2000);
+            const trace = {
+                x: sample.map(d => d.Peso_Neto_Kg),
+                y: sample.map(d => d.FOB),
+                mode: 'markers',
+                type: 'scatter',
+                marker: {
+                    size: 5,
+                    color: sample.map(d => d.Ano),
+                    colorscale: 'Viridis',
+                    showscale: true,
+                    colorbar: { title: 'Año', thickness: 15, len: 0.7 },
+                    opacity: 0.6,
+                    line: { width: 0 }
+                },
+                text: sample.map(d => `${d.Producto}<br>País: ${d.Pais_Origen}<br>Vía: ${d.Via}<br>Año: ${d.Ano}`),
+                hovertemplate: 'Peso: %{x:,.0f} Kg<br>FOB: $%{y:,.0f}<br>%{text}<extra></extra>'
+            };
+
+            const layout = {
+                margin: { t: 20, r: 20, b: 50, l: 70 },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') || '#1a1a2e' },
+                xaxis: {
+                    title: 'Peso Neto (Kg)',
+                    type: 'log',
+                    showgrid: true,
+                    gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb'
+                },
+                yaxis: {
+                    title: 'FOB (USD)',
+                    type: 'log',
+                    showgrid: true,
+                    gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb'
+                },
+                hovermode: 'closest',
+                showlegend: false
+            };
+
+            Plotly.newPlot('chart-scatter', [trace], layout, { responsive: true, displayModeBar: false });
+        }
+
+        // Top Países
+        function renderTopPaises() {
+            if (!rawData) return;
+
+            // Check if any ACTUAL filter is applied (not default 'all')
+            const filtersActive = currentFilters.years[0] !== 'all' ||
+                currentFilters.vias[0] !== 'all' ||
+                currentFilters.paises[0] !== 'all' ||
+                currentFilters.incoterms[0] !== 'all' ||
+                currentFilters.distritos[0] !== 'all' ||
+                currentFilters.regimenes[0] !== 'all' ||
+                currentFilters.estados[0] !== 'all' ||
+                currentFilters.producto !== '' ||
+                currentFilters.mesInicio > 1 ||
+                currentFilters.mesFin < 12;
+
+            let sorted;
+            const hasFiltered = filteredData && filteredData.length > 0;
+
+            if (filtersActive && hasFiltered) {
+                // Compute from filtered detail_data
+                const agg = {};
+                filteredData.forEach(d => {
+                    const key = d.Pais_Origen || 'Sin dato';
+                    agg[key] = (agg[key] || 0) + (d.FOB || 0);
+                });
+                sorted = Object.entries(agg)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 10)
+                    .reverse();
+            } else {
+                // Use pre-aggregated full dataset
+                sorted = (rawData.top_paises || [])
+                    .slice(0, 10)
+                    .reverse()
+                    .map(d => [d.Pais_Origen, d.FOB]);
+            }
+
+            if (!sorted || sorted.length === 0) return;
+
+            const trace = {
+                x: sorted.map(d => d[1]),
+                y: sorted.map(d => d[0]),
+                type: 'bar',
+                orientation: 'h',
+                marker: { color: '#1e3a8a' },
+                text: sorted.map(d => formatCurrency(d[1])),
+                textposition: 'outside',
+                textfont: { size: 10 },
+                hovertemplate: '%{y}<br>FOB: %{x:$,.0f}<extra></extra>'
+            };
+
+            const layout = {
+                margin: { t: 10, r: 10, b: 30, l: 120 },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') || '#1a1a2e', size: 11 },
+                xaxis: { showgrid: true, gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb', tickformat: '$,.0s' },
+                yaxis: { automargin: true },
+                showlegend: false
+            };
+
+            Plotly.newPlot('chart-top-paises', [trace], layout, { responsive: true, displayModeBar: false });
+        }
+
+        // Top Subpartidas (Sistema Armonizado)
+        function renderTopProductos() {
+            if (!rawData) return;
+
+            let data, isFiltered = false;
+            const hasFilters = currentFilters.years[0] !== 'all' ||
+                currentFilters.vias[0] !== 'all' ||
+                currentFilters.paises[0] !== 'all' ||
+                currentFilters.incoterms[0] !== 'all' ||
+                currentFilters.distritos[0] !== 'all' ||
+                currentFilters.regimenes[0] !== 'all' ||
+                currentFilters.estados[0] !== 'all' ||
+                currentFilters.producto !== '' ||
+                currentFilters.mesInicio > 1 ||
+                currentFilters.mesFin < 12;
+
+            if (hasFilters && filteredData && filteredData.length > 0) {
+                // Use filtered detail_data
+                data = filteredData;
+                isFiltered = true;
+            } else {
+                // Use pre-aggregated full dataset
+                data = rawData.top_subpartidas || [];
+            }
+
+            let sorted;
+            if (isFiltered) {
+                // Aggregate from filtered detail_data
+                const agg = {};
+                data.forEach(d => {
+                    const key = String(d.Subpartida || 'Sin dato').replace(/^'/, '');
+                    agg[key] = (agg[key] || 0) + (d.FOB || 0);
+                });
+                sorted = Object.entries(agg)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 10)
+                    .reverse();
+            } else {
+                // Already aggregated and sorted in rawData
+                sorted = data
+                    .slice(0, 10)
+                    .reverse()
+                    .map(d => {
+                        const subpartida = String(d.Subpartida).replace(/^'/, ''); // Remove leading quote from Excel
+                        return [subpartida, d.FOB];
+                    });
+            }
+
+            const trace = {
+                x: sorted.map(d => d[1]),
+                y: sorted.map(d => d[0]),
+                type: 'bar',
+                orientation: 'h',
+                marker: { color: '#059669' },
+                text: sorted.map(d => formatCurrency(d[1])),
+                textposition: 'outside',
+                textfont: { size: 10 },
+                hovertemplate: 'Subpartida: %{y}<br>FOB: %{x:$,.0f}<extra></extra>'
+            };
+
+            const layout = {
+                margin: { t: 10, r: 10, b: 30, l: 60 },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') || '#1a1a2e', size: 10 },
+                xaxis: { showgrid: true, gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb', tickformat: '$,.0s' },
+                yaxis: { automargin: true, type: 'category', tickfont: { size: 10 } },
+                showlegend: false
+            };
+
+            Plotly.newPlot('chart-top-productos', [trace], layout, { responsive: true, displayModeBar: false });
+        }
+
+        // Vía
+        function renderVia() {
+            if (!rawData) return;
+
+            const hasFilters = currentFilters.years[0] !== 'all' ||
+                currentFilters.vias[0] !== 'all' ||
+                currentFilters.paises[0] !== 'all' ||
+                currentFilters.incoterms[0] !== 'all' ||
+                currentFilters.distritos[0] !== 'all' ||
+                currentFilters.regimenes[0] !== 'all' ||
+                currentFilters.estados[0] !== 'all' ||
+                currentFilters.producto !== '' ||
+                currentFilters.mesInicio > 1 ||
+                currentFilters.mesFin < 12;
+
+            let sorted;
+            const hasFiltered = filteredData && filteredData.length > 0;
+
+            if (hasFilters && hasFiltered) {
+                // Compute from filtered detail_data
+                const agg = {};
+                filteredData.forEach(d => {
+                    const key = d.Via || 'Sin dato';
+                    agg[key] = (agg[key] || 0) + (d.FOB || 0);
+                });
+                sorted = Object.entries(agg).sort((a, b) => b[1] - a[1]);
+            } else {
+                // Use pre-aggregated full dataset + calculate "Sin dato" as difference from total
+                const preAgg = (rawData.via_dist || []).map(d => [d.Via, d.FOB]);
+                const viaSum = preAgg.reduce((sum, d) => sum + d[1], 0);
+                const sinDatoFOB = rawData.kpis.total_fob - viaSum;
+
+                if (sinDatoFOB > 0) {
+                    preAgg.push(['Sin dato', sinDatoFOB]);
+                }
+
+                sorted = preAgg.sort((a, b) => b[1] - a[1]);
+            }
+
+            if (!sorted || sorted.length === 0) return;
+
+            const colors = ['#1e3a8a', '#059669', '#7c3aed', '#ea580c', '#dc2626', '#0891b2'];
+
+            const trace = {
+                labels: sorted.map(d => d[0]),
+                values: sorted.map(d => d[1]),
+                type: 'pie',
+                hole: 0.5,
+                marker: { colors: colors.slice(0, sorted.length) },
+                textinfo: 'label+percent',
+                textfont: { size: 10 },
+                hovertemplate: '%{label}<br>FOB: $%{value:,.0f}<br>%{percent}<extra></extra>'
+            };
+
+            const layout = {
+                margin: { t: 10, r: 10, b: 10, l: 10 },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') || '#1a1a2e', size: 10 },
+                showlegend: false
+            };
+
+            Plotly.newPlot('chart-via', [trace], layout, { responsive: true, displayModeBar: false });
+        }
+
+        // Incoterm
+        function renderIncoterm() {
+            if (!rawData) return;
+
+            const hasFilters = currentFilters.years[0] !== 'all' ||
+                currentFilters.vias[0] !== 'all' ||
+                currentFilters.paises[0] !== 'all' ||
+                currentFilters.incoterms[0] !== 'all' ||
+                currentFilters.distritos[0] !== 'all' ||
+                currentFilters.regimenes[0] !== 'all' ||
+                currentFilters.estados[0] !== 'all' ||
+                currentFilters.producto !== '' ||
+                currentFilters.mesInicio > 1 ||
+                currentFilters.mesFin < 12;
+
+            let sorted;
+            const hasFiltered = filteredData && filteredData.length > 0;
+
+            if (hasFilters && hasFiltered) {
+                // Compute from filtered detail_data
+                const agg = {};
+                filteredData.forEach(d => {
+                    const key = d.Incoterm || 'Sin dato';
+                    agg[key] = (agg[key] || 0) + (d.FOB || 0);
+                });
+                sorted = Object.entries(agg).sort((a, b) => b[1] - a[1]).slice(0, 8);
+            } else {
+                // Use pre-aggregated full dataset + calculate "Sin dato" as difference from total
+                const preAgg = (rawData.incoterm_dist || []).map(d => [d.Incoterm, d.FOB]);
+                const incotermSum = preAgg.reduce((sum, d) => sum + d[1], 0);
+                const sinDatoFOB = rawData.kpis.total_fob - incotermSum;
+
+                if (sinDatoFOB > 0) {
+                    preAgg.push(['Sin dato', sinDatoFOB]);
+                }
+
+                sorted = preAgg.sort((a, b) => b[1] - a[1]).slice(0, 8);
+            }
+
+            if (!sorted || sorted.length === 0) return;
+
+            const colors = ['#1e3a8a', '#059669', '#7c3aed', '#ea580c', '#dc2626', '#0891b2', '#65a30d', '#db2777'];
+
+            const trace = {
+                labels: sorted.map(d => d[0]),
+                values: sorted.map(d => d[1]),
+                type: 'pie',
+                hole: 0.5,
+                marker: { colors: colors.slice(0, sorted.length) },
+                textinfo: 'label+percent',
+                hovertemplate: '%{label}<br>FOB: $%{value:,.0f}<br>%{percent}<extra></extra>'
+            };
+
+            const layout = {
+                margin: { t: 10, r: 10, b: 10, l: 10 },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') || '#1a1a2e', size: 10 },
+                showlegend: false
+            };
+
+            Plotly.newPlot('chart-incoterm', [trace], layout, { responsive: true, displayModeBar: false });
+        }
+
+        // Distrito
+        function renderDistrito() {
+            if (!rawData) return;
+
+            const hasFilters = currentFilters.years[0] !== 'all' ||
+                currentFilters.vias[0] !== 'all' ||
+                currentFilters.paises[0] !== 'all' ||
+                currentFilters.incoterms[0] !== 'all' ||
+                currentFilters.distritos[0] !== 'all' ||
+                currentFilters.regimenes[0] !== 'all' ||
+                currentFilters.estados[0] !== 'all' ||
+                currentFilters.producto !== '' ||
+                currentFilters.mesInicio > 1 ||
+                currentFilters.mesFin < 12;
+
+            let sorted;
+            const hasFiltered = filteredData && filteredData.length > 0;
+
+            if (hasFilters && hasFiltered) {
+                // Compute from filtered detail_data
+                const agg = {};
+                filteredData.forEach(d => {
+                    const key = d.Distrito || 'Sin dato';
+                    agg[key] = (agg[key] || 0) + (d.FOB || 0);
+                });
+                sorted = Object.entries(agg).sort((a, b) => b[1] - a[1]).slice(0, 15).reverse();
+            } else {
+                // Use pre-aggregated full dataset
+                sorted = (rawData.distrito_dist || [])
+                    .slice(0, 15)
+                    .reverse()
+                    .map(d => [d.Distrito, d.FOB]);
+            }
+
+            if (!sorted || sorted.length === 0) return;
+
+            const trace = {
+                x: sorted.map(d => d[1]),
+                y: sorted.map(d => d[0]),
+                type: 'bar',
+                orientation: 'h',
+                marker: { color: '#7c3aed' },
+                text: sorted.map(d => formatCurrency(d[1])),
+                textposition: 'outside',
+                textfont: { size: 10 },
+                hovertemplate: '%{y}<br>FOB: %{x:$,.0f}<extra></extra>'
+            };
+
+            const layout = {
+                margin: { t: 10, r: 10, b: 30, l: 180 },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') || '#1a1a2e', size: 10 },
+                xaxis: { showgrid: true, gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb', tickformat: '$,.0s' },
+                yaxis: { automargin: true },
+                showlegend: false
+            };
+
+            Plotly.newPlot('chart-distrito', [trace], layout, { responsive: true, displayModeBar: false });
+        }
+
+        // Tables
+        function renderTables() {
+            renderTable('table-top-importadores', rawData.top_importadores, ['Importador', 'Peso_Neto_Kg', 'FOB', 'CIF', 'Registros'], ['Importador', 'Peso Neto (Kg)', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
+            renderTable('table-top-marcas', rawData.top_marcas, ['Marca', 'FOB', 'CIF', 'Registros'], ['Marca', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
+            renderTable('table-top-subpartidas', rawData.top_subpartidas, ['Subpartida', 'Peso_Neto_Kg', 'FOB', 'CIF', 'Registros'], ['Subpartida', 'Peso Neto (Kg)', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
+            renderTable('table-top-transportistas', rawData.top_transportistas, ['Transportista', 'FOB', 'CIF', 'Registros'], ['Transportista', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
+            renderTable('table-top-consignatarios', rawData.top_consignatarios, ['Consignatario', 'FOB', 'CIF', 'Registros'], ['Consignatario', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
+        }
+
+        function renderTable(containerId, data, keys, headers, formats = {}) {
+            const container = document.getElementById(containerId);
+            if (!data || data.length === 0) {
+                container.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--text-muted);">Sin datos</div>';
+                return;
+            }
+
+            let html = '<table class="data-table"><thead><tr>';
+            headers.forEach(h => html += `<th>${h}</th>`);
+            html += '</tr></thead><tbody>';
+
+            data.slice(0, 20).forEach(row => {
+                html += '<tr>';
+                keys.forEach(key => {
+                    let val = row[key] !== undefined ? row[key] : row[key.replace('_', '')] || '';
+                    if (formats[key] === 'currency') {
+                        val = formatCurrency(val);
+                        html += `<td class="number">${val}</td>`;
+                    } else if (typeof val === 'number') {
+                        val = formatNumber(val);
+                        html += `<td class="number">${val}</td>`;
+                    } else {
+                        html += `<td>${escapeHtml(String(val))}</td>`;
+                    }
+                });
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // Países por año
+        function renderPaisesYearChart() {
+            if (!rawData || !rawData.top_paises_year) return;
+
+            const data = rawData.top_paises_year;
+            const years = [...new Set(data.map(d => d.Ano))].sort();
+            const traces = [];
+
+            years.forEach((year, i) => {
+                const yearData = data.filter(d => d.Ano === year).slice(0, 10).reverse();
+                traces.push({
+                    x: yearData.map(d => d.FOB),
+                    y: yearData.map(d => d.Pais_Origen),
+                    type: 'bar',
+                    orientation: 'h',
+                    name: String(year),
+                    marker: { color: getColor(i) },
+                    visible: i === 0 ? true : 'legendonly',
+                    hovertemplate: '%{y}<br>FOB: $%{x:,.0f}<extra></extra>'
+                });
+            });
+
+            const layout = {
+                margin: { t: 30, r: 10, b: 30, l: 120 },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') || '#1a1a2e', size: 10 },
+                xaxis: { showgrid: true, gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb', tickformat: '$,.0s' },
+                yaxis: { automargin: true },
+                barmode: 'stack',
+                legend: { orientation: 'h', y: -0.2 }
+            };
+
+            Plotly.newPlot('chart-paises-year', traces, layout, { responsive: true, displayModeBar: false });
+        }
+
+        // ==================== UTILITIES ====================
+        function formatCurrency(val) {
+            if (val === null || val === undefined || isNaN(val)) return '$0';
+            const abs = Math.abs(val);
+            if (abs >= 1e9) return '$' + (val / 1e9).toFixed(2) + 'B';
+            if (abs >= 1e6) return '$' + (val / 1e6).toFixed(2) + 'M';
+            if (abs >= 1e3) return '$' + (val / 1e3).toFixed(1) + 'K';
+            return '$' + val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        function formatNumber(val) {
+            if (val === null || val === undefined || isNaN(val)) return '0';
+            return val.toLocaleString(undefined, { maximumFractionDigits: 0 });
+        }
+
+        function truncate(str, len) {
+            if (!str) return '';
+            return str.length > len ? str.substring(0, len) + '...' : str;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function getColor(i) {
+            const colors = ['#1e3a8a', '#059669', '#7c3aed', '#ea580c', '#dc2626', '#0891b2', '#65a30d', '#db2777', '#f59e0b', '#6366f1'];
+            return colors[i % colors.length];
+        }
+
+        // ==================== INIT ====================
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>
