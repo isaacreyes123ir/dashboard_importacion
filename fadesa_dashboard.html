@@ -1342,10 +1342,10 @@
                 return Object.values(agg).sort((a, b) => b.FOB - a.FOB);
             };
 
-            renderTable('table-top-marcas', agruparDatos('Marca'), ['Marca', 'FOB', 'CIF', 'Registros'], ['Marca', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
+            renderTable('table-top-marcas', agruparDatos('Marca'), ['Marca', 'Peso_Neto_Kg', 'FOB', 'CIF', 'Registros'], ['Marca', 'Peso_Neto_Kg', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
             renderTable('table-top-subpartidas', agruparDatos('Subpartida'), ['Subpartida', 'Peso_Neto_Kg', 'FOB', 'CIF', 'Registros'], ['Subpartida', 'Peso Neto (Kg)', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
-            renderTable('table-top-transportistas', agruparDatos('Transportista'), ['Transportista', 'FOB', 'CIF', 'Registros'], ['Transportista', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
-            renderTable('table-top-consignatarios', agruparDatos('Consignatario'), ['Consignatario', 'FOB', 'CIF', 'Registros'], ['Consignatario', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
+            renderTable('table-top-transportistas', agruparDatos('Transportista'), ['Transportista', 'Peso_Neto_Kg', 'FOB', 'CIF', 'Registros'], ['Transportista', 'Peso_Neto_Kg', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
+            renderTable('table-top-consignatarios', agruparDatos('Consignatario'), ['Consignatario', 'Peso_Neto_Kg', 'FOB', 'CIF', 'Registros'], ['Consignatario', 'Peso_Neto_Kg', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
         }
 
         function renderTable(containerId, data, keys, headers, formats = {}) {
