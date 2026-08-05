@@ -935,12 +935,11 @@
                 font: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') || '#1a1a2e' },
                 xaxis: { side: 'top', tickfont: { size: 11 } },
                 yaxis: { 
-                    autorange: 'reversed', 
                     type: 'category', 
                     tickmode: 'array',
-                    tickvals: years.map(String).reverse(),
-                    ticktext: years.map(String).reverse(),
-                    tickfont: { size: 11 } 
+                    tickvals: years.map(String),
+                    ticktext: years.map(String),
+                    tickfont: { size: 11 }
                 }
             };
 
