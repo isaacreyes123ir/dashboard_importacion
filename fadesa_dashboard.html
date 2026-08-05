@@ -917,14 +917,11 @@
             const trace = {
                 z: z,
                 x: months,
-                y: years.map(String).reverse(),
+                y: years.map(String),
                 type: 'heatmap',
                 colorscale: 'Viridis',
                 showscale: true,
                 colorbar: { title: 'FOB (USD)', thickness: 15, len: 0.7 },
-                
-                
-                
                 hovertemplate: 'Año: %{y}<br>Mes: %{x}<br>FOB: %{z:$,.0f}<extra></extra>'
             };
 
