@@ -680,6 +680,7 @@
 
         function applyFilters() {
             if (!rawData) return;
+            console.log(rawData.detail_data[0]);
             filteredData = (rawData.detail_data || []).filter(d => {
                 if (currentFilters.years[0] !== 'all' && String(d.Ano) !== currentFilters.years[0]) return false;
                 if (currentFilters.vias[0] !== 'all' && String(d.Via) !== currentFilters.vias[0]) return false;
