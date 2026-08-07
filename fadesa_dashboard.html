@@ -3,49 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard FADESA 2019-2025 - Auditoría de Importaciones</title>
+    <title>Auditoría de Importaciones 2019-2025</title>
     <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --bg: #f8f9fa;
+            --bg: #f3f4f6; /* Fondo gris muy claro para contrastar con cuadros blancos */
             --surface: #ffffff;
-            --text: #1a1a2e;
+            --primary: #1e3a8a; /* Azul oscuro corporativo */
+            --accent: #059669; /* Verde esmeralda para resaltar datos positivos */
+            --text: #1f2937;
             --text-muted: #6b7280;
-            --primary: #1e3a8a;
-            --primary-light: #3b82f6;
-            --accent: #059669;
             --border: #e5e7eb;
-            --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             --radius: 8px;
-            --transition: all 0.2s ease;
-        }
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg: #0f172a;
-                --surface: #1e293b;
-                --text: #f1f5f9;
-                --text-muted: #94a3b8;
-                --primary: #60a5fa;
-                --primary-light: #93c5fd;
-                --accent: #34d399;
-                --border: #334155;
-                --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
-                --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.3), 0 4px 6px -2px rgba(0,0,0,0.2);
-            }
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.5;
-            min-height: 100vh;
+            background-color: var(--bg);
         }
         .header {
             background: var(--surface);
             border-bottom: 1px solid var(--border);
-            padding: 1rem 2rem;
+            padding: 0.5rem 1.5rem; /* Padding reducido */
             position: sticky;
             top: 0;
             z-index: 100;
@@ -88,13 +68,13 @@
             font-weight: 600;
         }
         .filter-group select, .filter-group input {
-            padding: 0.5rem 0.75rem;
+            padding: 0.35rem 0.5rem; /* Padding reducido */
             border: 1px solid var(--border);
             border-radius: var(--radius);
             background: var(--bg);
             color: var(--text);
-            font-size: 0.875rem;
-            min-width: 160px;
+            font-size: 0.75rem; /* Fuente más pequeña */
+            min-width: 110px; /* Ancho mínimo reducido */
             cursor: pointer;
         }
         .filter-group select:focus, .filter-group input:focus {
@@ -104,43 +84,51 @@
         }
         .kpi-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1rem;
-            padding: 1.5rem 2rem;
+            grid-template-columns: repeat(9, 1fr); /* Fuerza 9 columnas en una sola fila */
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
             max-width: 1920px;
             margin: 0 auto;
         }
         .kpi-card {
             background: var(--surface);
             border: 1px solid var(--border);
+            border-left: 4px solid var(--primary); /* Acento visual a la izquierda */
             border-radius: var(--radius);
-            padding: 1.25rem;
+            padding: 0.75rem;
             box-shadow: var(--shadow);
-            transition: var(--transition);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        /* Alternar colores en los KPIs para dinamismo */
+        .kpi-card:nth-child(even) {
+            border-left: 4px solid var(--accent);
         }
         .kpi-card:hover {
             box-shadow: var(--shadow-lg);
             transform: translateY(-2px);
         }
         .kpi-label {
-            font-size: 0.7rem;
+            font-size: 0.6rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.02em;
             color: var(--text-muted);
             font-weight: 600;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.2rem;
+            white-space: nowrap; /* Evita que el título salte a otra línea */
+            overflow: hidden;
+            text-overflow: ellipsis; /* Pone "..." si el título es muy largo */
         }
         .kpi-value {
-            font-size: 1.75rem;
+            font-size: 1.1rem;
             font-weight: 700;
             color: var(--text);
         }
         .kpi-value.primary { color: var(--primary); }
         .kpi-value.accent { color: var(--accent); }
         .kpi-delta {
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             color: var(--text-muted);
-            margin-top: 0.25rem;
+            margin-top: 0.15rem;
         }
         .main-grid {
             display: grid;
@@ -191,8 +179,12 @@
             border: 1px solid var(--border);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            overflow: hidden;
-            min-height: 400px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .main-content {
+            padding: 1.5rem;
+            gap: 1.5rem; /* Espaciado simétrico entre filas */
         }
         .chart-header {
             padding: 1rem 1.25rem;
@@ -280,20 +272,19 @@
             font-size: 0.75rem;
         }
         .data-table th, .data-table td {
+            text-align: center !important;
             padding: 0.5rem;
             text-align: left;
             border-bottom: 1px solid var(--border);
         }
+        .data-table th:first-child, .data-table td:first-child {
+            text-align: left !important;
+        }
         .data-table th {
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-size: 0.65rem;
-            position: sticky;
-            top: 0;
-            background: var(--surface);
-            z-index: 1;
+            background-color: #f8fafc;
+            color: var(--primary);
+            border-bottom: 2px solid var(--border);
+            padding: 0.75rem 0.5rem;
         }
         .data-table tr:hover td {
             background: var(--bg);
@@ -361,39 +352,41 @@
     <header class="header">
         <div class="header-content">
             <div>
-                <h1>Dashboard FADESA 2019-2025</h1>
-                <div class="subtitle">Auditoría de Importaciones | 126,766 registros | $564.1M FOB</div>
-            </div>
+                <h1>Auditoría de Importaciones 2019-2025</h1>
             <div class="filters">
                 <div class="filter-group">
                     <label>Año</label>
-                    <select id="filter-year" multiple>
-                        <option value="all" selected>Todos</option>
-                    </select>
+                    <select id="filter-year"><option value="all" selected>Todos</option></select>
                 </div>
                 <div class="filter-group">
                     <label>Vía</label>
-                    <select id="filter-via" multiple>
-                        <option value="all" selected>Todas</option>
-                    </select>
+                    <select id="filter-via"><option value="all" selected>Todas</option></select>
                 </div>
                 <div class="filter-group">
                     <label>País Origen</label>
-                    <select id="filter-pais" multiple>
-                        <option value="all" selected>Todos</option>
-                    </select>
+                    <select id="filter-pais"><option value="all" selected>Todos</option></select>
                 </div>
                 <div class="filter-group">
                     <label>Incoterm</label>
-                    <select id="filter-incoterm" multiple>
-                        <option value="all" selected>Todos</option>
-                    </select>
+                    <select id="filter-incoterm"><option value="all" selected>Todos</option></select>
+                </div>
+                <div class="filter-group">
+                    <label>Distrito</label>
+                    <select id="filter-distrito"><option value="all" selected>Todos</option></select>
+                </div>
+                <div class="filter-group">
+                    <label>Régimen</label>
+                    <select id="filter-regimen"><option value="all" selected>Todos</option></select>
+                </div>
+                <div class="filter-group">
+                    <label>Estado</label>
+                    <select id="filter-estado-decl"><option value="all" selected>Todos</option></select>
                 </div>
                 <div class="filter-group">
                     <label>Producto</label>
                     <input type="text" id="filter-producto" placeholder="Buscar producto...">
                 </div>
-                <button class="btn" id="btn-reset">Limpiar filtros</button>
+                <button class="btn" id="btn-reset">Limpiar</button>
             </div>
         </div>
     </header>
@@ -402,61 +395,13 @@
 
     <div class="main-grid">
         <aside class="sidebar">
-            <div class="panel">
-                <div class="panel-header">
-                    <span>Filtros Rápidos</span>
-                </div>
-                <div class="panel-content">
-                    <div class="filter-group" style="margin-bottom: 1rem;">
-                        <label>Rango de fechas</label>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <select id="filter-mes-inicio" style="flex: 1;">
-                                <option value="1">Enero</option>
-                                <option value="2">Febrero</option>
-                                <option value="3">Marzo</option>
-                                <option value="4">Abril</option>
-                                <option value="5">Mayo</option>
-                                <option value="6">Junio</option>
-                                <option value="7">Julio</option>
-                                <option value="8">Agosto</option>
-                                <option value="9">Septiembre</option>
-                                <option value="10">Octubre</option>
-                                <option value="11">Noviembre</option>
-                                <option value="12">Diciembre</option>
-                            </select>
-                            <select id="filter-mes-fin" style="flex: 1;">
-                                <option value="12" selected>Diciembre</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="filter-group" style="margin-bottom: 1rem;">
-                        <label>Distrito</label>
-                        <select id="filter-distrito" multiple>
-                            <option value="all" selected>Todos</option>
-                        </select>
-                    </div>
-                    <div class="filter-group" style="margin-bottom: 1rem;">
-                        <label>Régimen</label>
-                        <select id="filter-regimen" multiple>
-                            <option value="all" selected>Todos</option>
-                        </select>
-                    </div>
-                    <div class="filter-group" style="margin-bottom: 1rem;">
-                        <label>Estado Declaración</label>
-                        <select id="filter-estado-decl" multiple>
-                            <option value="all" selected>Todos</option>
-                        </select>
-                    </div>
-                    <button class="btn primary" id="btn-apply-filters" style="width: 100%; margin-top: 0.5rem;">Aplicar Filtros</button>
-                </div>
-            </div>
 
             <div class="panel">
                 <div class="panel-header">
                     <span>Top 10 Países de Origen</span>
                 </div>
                 <div class="panel-content">
-                    <div id="chart-top-paises" style="height: 300px;"></div>
+                    <div id="chart-top-paises" style="height: 380px;"></div>
                 </div>
             </div>
 
@@ -486,6 +431,15 @@
                     <div id="chart-incoterm" style="height: 250px;"></div>
                 </div>
             </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>Distribución por Distrito</h3>
+                </div>
+                <div class="panel-content">
+                    <div id="chart-distrito" style="height: 250px;"></div>
+                </div>
+            </div>
         </aside>
 
         <main>
@@ -501,6 +455,19 @@
                 </div>
                 <div class="chart-wrapper">
                     <div id="chart-timeseries" style="height: 450px;"></div>
+                </div>
+                
+            </div>
+
+            <div class="chart-container" style="margin-bottom: 1.5rem; min-height: auto;">
+                <div class="chart-header">
+                    <h3>Análisis DuPont</h3>
+                </div>
+                <div class="chart-wrapper">
+                    <div id="table-dupont" style="overflow-x: auto;"></div>
+                    <div style="font-size: 0.65rem; color: var(--text-muted); margin-top: 0.75rem; text-align: center; font-style: italic;">
+                        Nota: Estos datos financieros son estrictamente anuales y responden únicamente al filtro de "Año". Ignoran los demás filtros.
+                    </div>
                 </div>
             </div>
 
@@ -529,8 +496,7 @@
                     <h3>Análisis Detallado</h3>
                     <div class="chart-actions">
                         <div class="tab-container" id="detail-tabs">
-                            <button class="tab active" data-tab="top-importadores">Top Importadores</button>
-                            <button class="tab" data-tab="top-marcas">Top Marcas</button>
+                            <button class="tab active" data-tab="top-marcas">Top Marcas</button>
                             <button class="tab" data-tab="top-subpartidas">Top Subpartidas</button>
                             <button class="tab" data-tab="top-transportistas">Transportistas</button>
                             <button class="tab" data-tab="top-consignatarios">Consignatarios</button>
@@ -539,10 +505,7 @@
                     </div>
                 </div>
                 <div class="chart-wrapper">
-                    <div class="tab-panel active" id="panel-top-importadores">
-                        <div id="table-top-importadores" style="overflow-x: auto;"></div>
-                    </div>
-                    <div class="tab-panel" id="panel-top-marcas">
+                    <div class="tab-panel active" id="panel-top-marcas">
                         <div id="table-top-marcas" style="overflow-x: auto;"></div>
                     </div>
                     <div class="tab-panel" id="panel-top-subpartidas">
@@ -560,14 +523,7 @@
                 </div>
             </div>
 
-            <div class="chart-container">
-                <div class="chart-header">
-                    <h3>Distribución por Distrito</h3>
-                </div>
-                <div class="chart-wrapper">
-                    <div id="chart-distrito" style="height: 350px;"></div>
-                </div>
-            </div>
+            
         </main>
     </div>
 
@@ -575,35 +531,60 @@
         // ==================== DATA LOADING ====================
         let rawData = null;
         let filteredData = null;
+        let dupontData = null;
+        
         let currentFilters = {
-            years: ['all'],
-            vias: ['all'],
-            paises: ['all'],
-            incoterms: ['all'],
-            producto: '',
-            mesInicio: 1,
-            mesFin: 12,
-            distritos: ['all'],
-            regimenes: ['all'],
-            estados: ['all']
+            years: ['all'], vias: ['all'], paises: ['all'], incoterms: ['all'],
+            distritos: ['all'], regimenes: ['all'], estados: ['all'],
+            producto: '', mesInicio: 1, mesFin: 12
         };
         let tsMetric = 'FOB';
 
-        // Load data
         async function loadData() {
             showLoading();
             try {
-                // Add timestamp to prevent caching
                 const response = await fetch('fadesa_dashboard_data.json?v=' + Date.now());
                 rawData = await response.json();
+                
+                // Cargar datos DuPont
+                const dupontResponse = await fetch('analisis.json?v=' + Date.now());
+                dupontData = await dupontResponse.json();
+
                 initializeFilters();
                 applyFilters();
             } catch (error) {
                 console.error('Error loading data:', error);
-                document.getElementById('kpi-grid').innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-muted);">Error cargando datos. Verifique que fadesa_dashboard_data.json existe.</div>';
+                document.getElementById('kpi-grid').innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-muted);">Error cargando datos.</div>';
             }
         }
 
+        function renderDuPont() {
+            if (!dupontData || dupontData.length === 0) return;
+            const container = document.getElementById('table-dupont');
+            const anioSeleccionado = currentFilters.years[0];
+            
+            const añosDisponibles = ['2019', '2020', '2021', '2022', '2023', '2024', '2025'];
+            const añosAMostrar = anioSeleccionado === 'all' ? añosDisponibles : [anioSeleccionado];
+
+            let html = '<table class="data-table"><thead><tr><th>Año</th>';
+            
+            // Generar los encabezados (Indicadores)
+            dupontData.forEach(row => {
+                html += `<th class="number">${row.Indicadores}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            // Generar las filas (Años)
+            añosAMostrar.forEach(y => {
+                html += `<tr><td style="font-weight:600;">${y}</td>`;
+                dupontData.forEach(row => {
+                    html += `<td class="number">${row[y]}</td>`;
+                });
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
         function showLoading() {
             document.getElementById('kpi-grid').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando datos...</div>';
         }
@@ -612,35 +593,30 @@
         function initializeFilters() {
             if (!rawData) return;
 
-            // Years
             const years = rawData.kpis.anios.sort((a, b) => b - a);
             populateSelect('filter-year', years.map(y => ({ value: y, label: y })));
 
-            // Vías
-            const vias = [...new Set(rawData.timeseries.map(d => d.Via).filter(Boolean))].sort();
+            // Leer de detail_data para obtener todas las opciones
+            const data = rawData.detail_data || [];
+
+            const vias = [...new Set(data.map(d => d.Via).filter(Boolean))].sort();
             populateSelect('filter-via', vias.map(v => ({ value: v, label: v })));
 
-            // Países
-            const paises = [...new Set(rawData.timeseries.map(d => d.Pais_Origen).filter(Boolean))].sort();
+            const paises = [...new Set(data.map(d => d.Pais_Origen).filter(Boolean))].sort();
             populateSelect('filter-pais', paises.slice(0, 50).map(p => ({ value: p, label: p })));
 
-            // Incoterms
-            const incoterms = [...new Set(rawData.timeseries.map(d => d.Incoterm).filter(Boolean))].sort();
+            const incoterms = [...new Set(data.map(d => d.Incoterm).filter(Boolean))].sort();
             populateSelect('filter-incoterm', incoterms.map(i => ({ value: i, label: i })));
 
-            // Distritos
-            const distritos = [...new Set(rawData.timeseries.map(d => d.Distrito).filter(Boolean))].sort();
+            const distritos = [...new Set(data.map(d => d.Distrito).filter(Boolean))].sort();
             populateSelect('filter-distrito', distritos.map(d => ({ value: d, label: d })));
 
-            // Régimenes
-            const regimenes = [...new Set(rawData.timeseries.map(d => d.Regimen).filter(Boolean))].sort();
+            const regimenes = [...new Set(data.map(d => d.Regimen).filter(Boolean))].sort();
             populateSelect('filter-regimen', regimenes.map(r => ({ value: r, label: r })));
 
-            // Estados declaración
-            const estados = [...new Set(rawData.timeseries.map(d => d.Estado_Declaracion).filter(Boolean))].sort();
+            const estados = [...new Set(data.map(d => d.Estado_Mercancia).filter(Boolean))].sort();
             populateSelect('filter-estado-decl', estados.map(e => ({ value: e, label: e })));
 
-            // Event listeners
             document.getElementById('filter-year').addEventListener('change', updateFilters);
             document.getElementById('filter-via').addEventListener('change', updateFilters);
             document.getElementById('filter-pais').addEventListener('change', updateFilters);
@@ -649,12 +625,8 @@
             document.getElementById('filter-distrito').addEventListener('change', updateFilters);
             document.getElementById('filter-regimen').addEventListener('change', updateFilters);
             document.getElementById('filter-estado-decl').addEventListener('change', updateFilters);
-            document.getElementById('filter-mes-inicio').addEventListener('change', updateFilters);
-            document.getElementById('filter-mes-fin').addEventListener('change', updateFilters);
             document.getElementById('btn-reset').addEventListener('click', resetFilters);
-            document.getElementById('btn-apply-filters').addEventListener('click', applyFilters);
 
-            // Time series metric buttons
             document.querySelectorAll('[id^="ts-metric-"]').forEach(btn => {
                 btn.addEventListener('click', function() {
                     document.querySelectorAll('[id^="ts-metric-"]').forEach(b => b.classList.remove('primary'));
@@ -664,7 +636,6 @@
                 });
             });
 
-            // Detail tabs
             document.querySelectorAll('#detail-tabs .tab').forEach(tab => {
                 tab.addEventListener('click', function() {
                     document.querySelectorAll('#detail-tabs .tab').forEach(t => t.classList.remove('active'));
@@ -678,22 +649,6 @@
 
         function populateSelect(id, options) {
             const select = document.getElementById(id);
-            const currentValue = select.value;
-            const isMulti = select.hasAttribute('multiple');
-
-            // Map select ID to currentFilters key
-            const keyMap = {
-                'filter-year': 'years',
-                'filter-via': 'vias',
-                'filter-pais': 'paises',
-                'filter-incoterm': 'incoterms',
-                'filter-distrito': 'distritos',
-                'filter-regimen': 'regimenes',
-                'filter-estado-decl': 'estados'
-            };
-            const filterKey = keyMap[id];
-
-            // Keep "all" option
             const allOption = select.querySelector('option[value="all"]');
             select.innerHTML = '';
             if (allOption) select.appendChild(allOption);
@@ -704,90 +659,94 @@
                 option.textContent = opt.label;
                 select.appendChild(option);
             });
-
-            if (isMulti && filterKey && currentFilters[filterKey]) {
-                // Restore selections if they exist in new options
-                Array.from(select.options).forEach(opt => {
-                    if (opt.value !== 'all' && currentFilters[filterKey].includes(opt.value)) {
-                        opt.selected = true;
-                    }
-                });
-            }
-        }
-
-        function getSelectedValues(selectId) {
-            const select = document.getElementById(selectId);
-            const values = Array.from(select.selectedOptions).map(o => o.value);
-            return values.includes('all') || values.length === 0 ? ['all'] : values;
         }
 
         function updateFilters() {
             currentFilters = {
-                years: getSelectedValues('filter-year'),
-                vias: getSelectedValues('filter-via'),
-                paises: getSelectedValues('filter-pais'),
-                incoterms: getSelectedValues('filter-incoterm'),
+                years: [document.getElementById('filter-year').value],
+                vias: [document.getElementById('filter-via').value],
+                paises: [document.getElementById('filter-pais').value],
+                incoterms: [document.getElementById('filter-incoterm').value],
+                distritos: [document.getElementById('filter-distrito').value],
+                regimenes: [document.getElementById('filter-regimen').value],
+                estados: [document.getElementById('filter-estado-decl').value],
                 producto: document.getElementById('filter-producto').value.toLowerCase(),
-                mesInicio: parseInt(document.getElementById('filter-mes-inicio').value),
-                mesFin: parseInt(document.getElementById('filter-mes-fin').value),
-                distritos: getSelectedValues('filter-distrito'),
-                regimenes: getSelectedValues('filter-regimen'),
-                estados: getSelectedValues('filter-estado-decl')
+                mesInicio: 1, 
+                mesFin: 12
             };
             applyFilters();
         }
 
         function applyFilters() {
             if (!rawData) return;
-
+            console.log(rawData.detail_data[0]);
             filteredData = (rawData.detail_data || []).filter(d => {
-                if (currentFilters.years[0] !== 'all' && !currentFilters.years.includes(d.Ano)) return false;
-                if (currentFilters.vias[0] !== 'all' && !currentFilters.vias.includes(d.Via)) return false;
-                if (currentFilters.paises[0] !== 'all' && !currentFilters.paises.includes(d.Pais_Origen)) return false;
-                if (currentFilters.incoterms[0] !== 'all' && !currentFilters.incoterms.includes(d.Incoterm)) return false;
-                if (currentFilters.distritos[0] !== 'all' && !currentFilters.distritos.includes(d.Distrito)) return false;
-                if (currentFilters.regimenes[0] !== 'all' && !currentFilters.regimenes.includes(d.Regimen)) return false;
-                if (currentFilters.estados[0] !== 'all' && !currentFilters.estados.includes(d.Estado_Declaracion)) return false;
-                if (currentFilters.producto && !d.Producto.toLowerCase().includes(currentFilters.producto)) return false;
-                if (d.Mes < currentFilters.mesInicio || d.Mes > currentFilters.mesFin) return false;
+                if (currentFilters.years[0] !== 'all' && String(d.Ano) !== currentFilters.years[0]) return false;
+                if (currentFilters.vias[0] !== 'all' && String(d.Via) !== currentFilters.vias[0]) return false;
+                if (currentFilters.paises[0] !== 'all' && String(d.Pais_Origen) !== currentFilters.paises[0]) return false;
+                if (currentFilters.incoterms[0] !== 'all' && String(d.Incoterm) !== currentFilters.incoterms[0]) return false;
+                if (currentFilters.distritos[0] !== 'all' && String(d.Distrito) !== currentFilters.distritos[0]) return false;
+                if (currentFilters.regimenes[0] !== 'all' && String(d.Regimen) !== currentFilters.regimenes[0]) return false;
+                if (currentFilters.estados[0] !== 'all' && String(d.Estado_Mercancia) !== currentFilters.estados[0]) return false;
+                if (currentFilters.producto && !String(d.Producto).toLowerCase().includes(currentFilters.producto)) return false;
                 return true;
             });
-
+            
+            updateFilterOptions(); // <--- Llama a la cascada aquí
             renderAll();
         }
 
-        function resetFilters() {
-            currentFilters = {
-                years: ['all'],
-                vias: ['all'],
-                paises: ['all'],
-                incoterms: ['all'],
-                producto: '',
-                mesInicio: 1,
-                mesFin: 12,
-                distritos: ['all'],
-                regimenes: ['all'],
-                estados: ['all']
+        function getValidOptions(excludeFilter) {
+            return (rawData.detail_data || []).filter(d => {
+                if (excludeFilter !== 'years' && currentFilters.years[0] !== 'all' && String(d.Ano) !== currentFilters.years[0]) return false;
+                if (excludeFilter !== 'vias' && currentFilters.vias[0] !== 'all' && String(d.Via) !== currentFilters.vias[0]) return false;
+                if (excludeFilter !== 'paises' && currentFilters.paises[0] !== 'all' && String(d.Pais_Origen) !== currentFilters.paises[0]) return false;
+                if (excludeFilter !== 'incoterms' && currentFilters.incoterms[0] !== 'all' && String(d.Incoterm) !== currentFilters.incoterms[0]) return false;
+                if (excludeFilter !== 'distritos' && currentFilters.distritos[0] !== 'all' && String(d.Distrito) !== currentFilters.distritos[0]) return false;
+                if (excludeFilter !== 'regimenes' && currentFilters.regimenes[0] !== 'all' && String(d.Regimen) !== currentFilters.regimenes[0]) return false;
+                if (excludeFilter !== 'estados' && currentFilters.estados[0] !== 'all' && String(d.Estado_Mercancia) !== currentFilters.estados[0]) return false;
+                if (currentFilters.producto && !String(d.Producto).toLowerCase().includes(currentFilters.producto)) return false;
+                return true;
+            });
+        }
+
+        function updateFilterOptions() {
+            const selects = {
+                'filter-year': { key: 'years', field: 'Ano' },
+                'filter-via': { key: 'vias', field: 'Via' },
+                'filter-pais': { key: 'paises', field: 'Pais_Origen' },
+                'filter-incoterm': { key: 'incoterms', field: 'Incoterm' },
+                'filter-distrito': { key: 'distritos', field: 'Distrito' },
+                'filter-regimen': { key: 'regimenes', field: 'Regimen' },
+                'filter-estado-decl': { key: 'estados', field: 'Estado_Mercancia' }
             };
 
-            document.getElementById('filter-year').value = 'all';
-            document.getElementById('filter-via').value = 'all';
-            document.getElementById('filter-pais').value = 'all';
-            document.getElementById('filter-incoterm').value = 'all';
-            document.getElementById('filter-producto').value = '';
-            document.getElementById('filter-distrito').value = 'all';
-            document.getElementById('filter-regimen').value = 'all';
-            document.getElementById('filter-estado-decl').value = 'all';
-            document.getElementById('filter-mes-inicio').value = '1';
-            document.getElementById('filter-mes-fin').value = '12';
+            for (const [id, meta] of Object.entries(selects)) {
+                const currentVal = document.getElementById(id).value;
+                const validData = getValidOptions(meta.key);
+                
+                let uniqueVals = [...new Set(validData.map(d => d[meta.field]).filter(Boolean))].sort();
+                if (meta.key === 'years') uniqueVals = uniqueVals.sort((a, b) => b - a);
+                
+                populateSelect(id, uniqueVals.map(v => ({ value: v, label: v })));
+                
+                if (currentVal !== 'all') {
+                    if (uniqueVals.map(String).includes(String(currentVal))) {
+                        document.getElementById(id).value = currentVal;
+                    } else {
+                        document.getElementById(id).value = 'all';
+                        currentFilters[meta.key] = ['all'];
+                    }
+                }
+            }
+        }
 
-            // Clear multi-select
+        function resetFilters() {
             ['filter-year', 'filter-via', 'filter-pais', 'filter-incoterm', 'filter-distrito', 'filter-regimen', 'filter-estado-decl'].forEach(id => {
-                const sel = document.getElementById(id);
-                Array.from(sel.options).forEach(opt => opt.selected = opt.value === 'all');
+                document.getElementById(id).value = 'all';
             });
-
-            applyFilters();
+            document.getElementById('filter-producto').value = '';
+            updateFilters();
         }
 
         function debounce(fn, delay) {
@@ -810,6 +769,7 @@
             renderIncoterm();
             renderDistrito();
             renderTables();
+            renderDuPont();
         }
 
         // KPIs
@@ -854,10 +814,8 @@
             const totalRegistros = filtersActive && hasFiltered ? filteredData.length : rawData.kpis.total_registros;
 
             // Use pre-computed unique counts when no filters active
-            const uniquePaises = filtersActive && hasFiltered
-                ? new Set(filteredData.map(d => d.Pais_Origen).filter(Boolean)).size
-                : rawData.kpis.paises_unicos;
-            const uniqueProductos = rawData.kpis.subpartidas_unicas || new Set(data.map(d => String(d.Subpartida || '').replace(/^'/, '')).filter(Boolean)).size;
+            const uniquePaises = new Set((filtersActive && hasFiltered ? filteredData : data).map(d => String(d.Pais_Origen || '').trim()).filter(Boolean)).size;
+            const uniqueProductos = new Set((filtersActive && hasFiltered ? filteredData : data).map(d => String(d.Subpartida || '').replace(/^'/, '').trim()).filter(Boolean)).size;
 
             const kpis = [
                 { label: 'Total Registros', value: totalRegistros.toLocaleString(), class: '' },
@@ -881,64 +839,42 @@
 
         // Time Series
         function renderTimeSeries() {
-            if (!rawData || !rawData.timeseries) return;
+            if (!filteredData || filteredData.length === 0) return;
 
-            // Use full timeseries data, apply same filters
-            const data = rawData.timeseries.filter(d => {
-                if (currentFilters.years[0] !== 'all' && !currentFilters.years.includes(d.Ano)) return false;
-                if (currentFilters.mesInicio > 1 || currentFilters.mesFin < 12) {
-                    if (d.Mes < currentFilters.mesInicio || d.Mes > currentFilters.mesFin) return false;
-                }
-                // Other filters (via, pais, etc.) not applicable to timeseries aggregates
-                return true;
+            const agg = {};
+            filteredData.forEach(d => {
+                const key = `${d.Ano}-${String(d.Mes).padStart(2, '0')}`;
+                if (!agg[key]) agg[key] = { x: key, FOB: 0, CIF: 0, COUNT: 0, PESO: 0, num: d.Ano * 100 + d.Mes };
+                agg[key].FOB += (d.FOB || 0);
+                agg[key].CIF += (d.CIF || 0);
+                agg[key].COUNT += 1;
+                agg[key].PESO += (d.Peso_Neto_Kg || 0);
             });
 
-            if (data.length === 0) return;
-
-            const sorted = data.sort((a, b) => a.Periodo_Num - b.Periodo_Num);
-            const x = sorted.map(d => `${d.Ano}-${String(d.Mes).padStart(2, '0')}`);
-            // Map tsMetric to actual data keys
-            const metricMap = { COUNT: 'Registros', PESO: 'Peso_Neto_Kg' };
-            const metricKey = metricMap[tsMetric] || tsMetric;
+            const sorted = Object.values(agg).sort((a, b) => a.num - b.num);
+            const x = sorted.map(d => d.x);
+            const metricKey = tsMetric === 'COUNT' ? 'COUNT' : (tsMetric === 'PESO' ? 'PESO' : tsMetric);
             const y = sorted.map(d => d[metricKey]);
 
             const metricLabels = { FOB: 'FOB (USD)', CIF: 'CIF (USD)', COUNT: 'Registros', PESO: 'Peso Neto (Kg)' };
             const metricColors = { FOB: '#1e3a8a', CIF: '#059669', COUNT: '#7c3aed', PESO: '#ea580c' };
 
             const trace = {
-                x: x,
-                y: y,
-                type: 'scatter',
-                mode: 'lines+markers',
+                x: x, y: y, type: 'scatter', mode: 'lines+markers',
                 line: { color: metricColors[tsMetric], width: 2 },
                 marker: { size: 5, color: metricColors[tsMetric] },
-                fill: 'tozeroy',
-                fillcolor: metricColors[tsMetric] + '33',
+                fill: 'tozeroy', fillcolor: metricColors[tsMetric] + '33',
                 name: metricLabels[tsMetric],
                 hovertemplate: '%{x}<br>%{y:,.0f}<extra></extra>'
             };
 
             const layout = {
                 margin: { t: 20, r: 20, b: 50, l: 70 },
-                paper_bgcolor: 'rgba(0,0,0,0)',
-                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
                 font: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') || '#1a1a2e' },
-                xaxis: {
-                    title: 'Periodo',
-                    showgrid: true,
-                    gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb',
-                    tickangle: -45,
-                    tickfont: { size: 10 }
-                },
-                yaxis: {
-                    title: metricLabels[tsMetric],
-                    showgrid: true,
-                    gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb',
-                    tickformat: ',.0f',
-                    tickfont: { size: 10 }
-                },
-                hovermode: 'x unified',
-                showlegend: false
+                xaxis: { title: 'Periodo', showgrid: true, gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb', tickangle: -45, tickfont: { size: 10 } },
+                yaxis: { title: metricLabels[tsMetric], showgrid: true, gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb', tickformat: ',.0f', tickfont: { size: 10 } },
+                hovermode: 'x unified', showlegend: false
             };
 
             Plotly.newPlot('chart-timeseries', [trace], layout, { responsive: true, displayModeBar: false });
@@ -970,14 +906,11 @@
             const trace = {
                 z: z,
                 x: months,
-                y: years.map(String).reverse(),
+                y: years.map(String),
                 type: 'heatmap',
                 colorscale: 'Viridis',
                 showscale: true,
                 colorbar: { title: 'FOB (USD)', thickness: 15, len: 0.7 },
-                
-                
-                
                 hovertemplate: 'Año: %{y}<br>Mes: %{x}<br>FOB: %{z:$,.0f}<extra></extra>'
             };
 
@@ -987,7 +920,13 @@
                 plot_bgcolor: 'rgba(0,0,0,0)',
                 font: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') || '#1a1a2e' },
                 xaxis: { side: 'top', tickfont: { size: 11 } },
-                yaxis: { autorange: 'reversed', tickfont: { size: 11 } }
+                yaxis: { 
+                    type: 'category', 
+                    tickmode: 'array',
+                    tickvals: years.map(String),
+                    ticktext: ['2019', '2020', '2021', '2022', '2023', '2024', '2025'],
+                    tickfont: { size: 11 }
+                }
             };
 
             Plotly.newPlot('chart-heatmap', [trace], layout, { responsive: true, displayModeBar: false });
@@ -995,9 +934,9 @@
 
         // Scatter
         function renderScatter() {
-            if (!rawData || !rawData.scatter_sample) return;
+            if (!filteredData || filteredData.length === 0) return;
 
-            const sample = rawData.scatter_sample.slice(0, 2000);
+            const sample = filteredData.slice(0, 2000);
             const trace = {
                 x: sample.map(d => d.Peso_Neto_Kg),
                 y: sample.map(d => d.FOB),
@@ -1008,7 +947,13 @@
                     color: sample.map(d => d.Ano),
                     colorscale: 'Viridis',
                     showscale: true,
-                    colorbar: { title: 'Año', thickness: 15, len: 0.7 },
+                    colorbar: { 
+                        title: 'Año', 
+                        thickness: 15, 
+                        len: 0.7,
+                        dtick: 1,           // Fuerza saltos de 1 en 1
+                        tickformat: 'd'     // Formato de número entero sin comas
+                    },
                     opacity: 0.6,
                     line: { width: 0 }
                 },
@@ -1227,7 +1172,8 @@
                 type: 'pie',
                 hole: 0.5,
                 marker: { colors: colors.slice(0, sorted.length) },
-                textinfo: 'label+percent',
+                textinfo: 'percent',
+                textposition: 'inside',
                 textfont: { size: 10 },
                 hovertemplate: '%{label}<br>FOB: $%{value:,.0f}<br>%{percent}<extra></extra>'
             };
@@ -1291,7 +1237,8 @@
                 type: 'pie',
                 hole: 0.5,
                 marker: { colors: colors.slice(0, sorted.length) },
-                textinfo: 'label+percent',
+                textinfo: 'percent',
+                textposition: 'inside',
                 hovertemplate: '%{label}<br>FOB: $%{value:,.0f}<br>%{percent}<extra></extra>'
             };
 
@@ -1354,7 +1301,7 @@
             };
 
             const layout = {
-                margin: { t: 10, r: 10, b: 30, l: 180 },
+                margin: { t: 10, r: 10, b: 30, l: 60 },
                 paper_bgcolor: 'rgba(0,0,0,0)',
                 plot_bgcolor: 'rgba(0,0,0,0)',
                 font: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') || '#1a1a2e', size: 10 },
@@ -1368,11 +1315,26 @@
 
         // Tables
         function renderTables() {
-            renderTable('table-top-importadores', rawData.top_importadores, ['Importador', 'Peso_Neto_Kg', 'FOB', 'CIF', 'Registros'], ['Importador', 'Peso Neto (Kg)', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
-            renderTable('table-top-marcas', rawData.top_marcas, ['Marca', 'FOB', 'CIF', 'Registros'], ['Marca', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
-            renderTable('table-top-subpartidas', rawData.top_subpartidas, ['Subpartida', 'Peso_Neto_Kg', 'FOB', 'CIF', 'Registros'], ['Subpartida', 'Peso Neto (Kg)', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
-            renderTable('table-top-transportistas', rawData.top_transportistas, ['Transportista', 'FOB', 'CIF', 'Registros'], ['Transportista', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
-            renderTable('table-top-consignatarios', rawData.top_consignatarios, ['Consignatario', 'FOB', 'CIF', 'Registros'], ['Consignatario', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
+            if (!filteredData || filteredData.length === 0) return;
+
+            const agruparDatos = (campo) => {
+                const agg = {};
+                filteredData.forEach(d => {
+                    let k = String(d[campo] || 'Sin dato').trim();
+                    if (campo === 'Subpartida') k = k.replace(/^'/, '');
+                    if (!agg[k]) agg[k] = { [campo]: k, FOB: 0, CIF: 0, Peso_Neto_Kg: 0, Registros: 0 };
+                    agg[k].FOB += (d.FOB || 0);
+                    agg[k].CIF += (d.CIF || 0);
+                    agg[k].Peso_Neto_Kg += (d.Peso_Neto_Kg || 0);
+                    agg[k].Registros += 1;
+                });
+                return Object.values(agg).sort((a, b) => b.FOB - a.FOB);
+            };
+
+            renderTable('table-top-marcas', agruparDatos('Marca'), ['Marca', 'Peso_Neto_Kg', 'FOB', 'CIF', 'Registros'], ['Marca', 'Peso_Neto_Kg', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
+            renderTable('table-top-subpartidas', agruparDatos('Subpartida'), ['Subpartida', 'Peso_Neto_Kg', 'FOB', 'CIF', 'Registros'], ['Subpartida', 'Peso Neto (Kg)', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
+            renderTable('table-top-transportistas', agruparDatos('Transportista'), ['Transportista', 'Peso_Neto_Kg', 'FOB', 'CIF', 'Registros'], ['Transportista', 'Peso_Neto_Kg', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
+            renderTable('table-top-consignatarios', agruparDatos('Consignatario'), ['Consignatario', 'Peso_Neto_Kg', 'FOB', 'CIF', 'Registros'], ['Consignatario', 'Peso_Neto_Kg', 'FOB', 'CIF', 'Registros'], { FOB: 'currency', CIF: 'currency' });
         }
 
         function renderTable(containerId, data, keys, headers, formats = {}) {
@@ -1433,7 +1395,7 @@
                 paper_bgcolor: 'rgba(0,0,0,0)',
                 plot_bgcolor: 'rgba(0,0,0,0)',
                 font: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') || '#1a1a2e', size: 10 },
-                xaxis: { showgrid: true, gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb', tickformat: '$,.0s' },
+                xaxis: { showgrid: true, gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb', tickformat: '$.3s' },
                 yaxis: { automargin: true },
                 barmode: 'stack',
                 legend: { orientation: 'h', y: -0.2 }
