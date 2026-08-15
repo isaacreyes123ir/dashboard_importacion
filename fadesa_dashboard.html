@@ -1101,67 +1101,6 @@
             Plotly.newPlot('chart-incoterm', [trace], layout, { responsive: true, displayModeBar: false });
         }
 
-        // Distrito
-        function renderDistrito() {
-            if (!rawData) return;
-
-            const hasFilters = currentFilters.years[0] !== 'all' ||
-                currentFilters.vias[0] !== 'all' ||
-                currentFilters.paises[0] !== 'all' ||
-                currentFilters.incoterms[0] !== 'all' ||
-                currentFilters.distritos[0] !== 'all' ||
-                currentFilters.regimenes[0] !== 'all' ||
-                currentFilters.estados[0] !== 'all' ||
-                currentFilters.producto !== '' ||
-                currentFilters.mesInicio > 1 ||
-                currentFilters.mesFin < 12;
-
-            let sorted;
-            const hasFiltered = filteredData && filteredData.length > 0;
-
-            if (hasFilters && hasFiltered) {
-                // Compute from filtered detail_data
-                const agg = {};
-                filteredData.forEach(d => {
-                    const key = d.Distrito || 'Sin dato';
-                    agg[key] = (agg[key] || 0) + (d.FOB || 0);
-                });
-                sorted = Object.entries(agg).sort((a, b) => b[1] - a[1]).slice(0, 15).reverse();
-            } else {
-                // Use pre-aggregated full dataset
-                sorted = (rawData.distrito_dist || [])
-                    .slice(0, 15)
-                    .reverse()
-                    .map(d => [d.Distrito, d.FOB]);
-            }
-
-            if (!sorted || sorted.length === 0) return;
-
-            const trace = {
-                x: sorted.map(d => d[1]),
-                y: sorted.map(d => d[0]),
-                type: 'bar',
-                orientation: 'h',
-                marker: { color: '#7c3aed' },
-                text: sorted.map(d => formatCurrency(d[1])),
-                textposition: 'outside',
-                textfont: { size: 10 },
-                hovertemplate: '%{y}<br>FOB: %{x:$,.0f}<extra></extra>'
-            };
-
-            const layout = {
-                margin: { t: 10, r: 10, b: 30, l: 60 },
-                paper_bgcolor: 'rgba(0,0,0,0)',
-                plot_bgcolor: 'rgba(0,0,0,0)',
-                font: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') || '#1a1a2e', size: 10 },
-                xaxis: { showgrid: true, gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb', tickformat: '$,.0s' },
-                yaxis: { automargin: true },
-                showlegend: false
-            };
-
-            Plotly.newPlot('chart-distrito', [trace], layout, { responsive: true, displayModeBar: false });
-        }
-
         // Tables
         function renderTables() {
             if (!filteredData || filteredData.length === 0) return;
