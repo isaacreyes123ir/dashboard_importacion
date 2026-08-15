@@ -852,58 +852,7 @@
             Plotly.newPlot('chart-timeseries', [trace], layout, { responsive: true, displayModeBar: false });
         }
 
-        // Heatmap
-        function renderHeatmap() {
-            if (!filteredData || filteredData.length === 0) return;
-
-            const years = [...new Set(filteredData.map(d => d.Ano))].sort();
-            const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-            const z = [];
-            const text = [];
-
-            years.forEach(year => {
-                const row = [];
-                const rowText = [];
-                months.forEach((month, mIdx) => {
-                    const val = filteredData
-                        .filter(d => d.Ano === year && d.Mes === mIdx + 1)
-                        .reduce((sum, d) => sum + (d.FOB || 0), 0);
-                    row.push(val);
-                    rowText.push(formatCurrency(val));
-                });
-                z.push(row);
-                text.push(rowText);
-            });
-
-            const trace = {
-                z: z,
-                x: months,
-                y: years.map(String),
-                type: 'heatmap',
-                colorscale: 'Viridis',
-                showscale: true,
-                colorbar: { title: 'FOB (USD)', thickness: 15, len: 0.7 },
-                hovertemplate: 'Año: %{y}<br>Mes: %{x}<br>FOB: %{z:$,.0f}<extra></extra>'
-            };
-
-            const layout = {
-                margin: { t: 20, r: 20, b: 40, l: 50 },
-                paper_bgcolor: 'rgba(0,0,0,0)',
-                plot_bgcolor: 'rgba(0,0,0,0)',
-                font: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') || '#1a1a2e' },
-                xaxis: { side: 'top', tickfont: { size: 11 } },
-                yaxis: { 
-                    type: 'category', 
-                    tickmode: 'array',
-                    tickvals: years.map(String),
-                    ticktext: ['2019', '2020', '2021', '2022', '2023', '2024', '2025'],
-                    tickfont: { size: 11 }
-                }
-            };
-
-            Plotly.newPlot('chart-heatmap', [trace], layout, { responsive: true, displayModeBar: false });
-        }
-
+        
         // Scatter
         function renderScatter() {
             if (!filteredData || filteredData.length === 0) return;
