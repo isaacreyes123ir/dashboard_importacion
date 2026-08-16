@@ -832,7 +832,7 @@ function renderTimeSeries() {
     const metricColors = { FOB: '#1e3a8a', FOB_KG: '#059669', COUNT: '#7c3aed', PESO: '#ea580c' };
 
     // Ajustar formato para mostrar decimales en el precio por Kg
-    const hoverTemplate = tsMetric === 'FOB_KG' ? '%{x}<br>$%{y:,.3f}/Kg<extra></extra>' : '%{x}<br>%{y:,.0f}<extra></extra>';
+    const hoverTemplate = tsMetric === 'FOB_KG' ? '%{x}<br>$%{y:,.2f}/Kg<extra></extra>' : '%{x}<br>%{y:,.0f}<extra></extra>';
     const yTickFormat = tsMetric === 'FOB_KG' ? '$,.2f' : ',.0f';
 
     const trace = {
