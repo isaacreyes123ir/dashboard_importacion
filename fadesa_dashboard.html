@@ -806,47 +806,55 @@
         }
 
         // Time Series
-        function renderTimeSeries() {
-            if (!filteredData || filteredData.length === 0) return;
+        // Time Series
+function renderTimeSeries() {
+    if (!filteredData || filteredData.length === 0) return;
 
-            const agg = {};
-            filteredData.forEach(d => {
-                const key = `${d.Ano}-${String(d.Mes).padStart(2, '0')}`;
-                if (!agg[key]) agg[key] = { x: key, FOB: 0, CIF: 0, COUNT: 0, PESO: 0, num: d.Ano * 100 + d.Mes };
-                agg[key].FOB += (d.FOB || 0);
-                agg[key].CIF += (d.CIF || 0);
-                agg[key].COUNT += 1;
-                agg[key].PESO += (d.Peso_Neto_Kg || 0);
-            });
+    const agg = {};
+    filteredData.forEach(d => {
+        const key = `${d.Ano}-${String(d.Mes).padStart(2, '0')}`;
+        if (!agg[key]) agg[key] = { x: key, FOB: 0, COUNT: 0, PESO: 0, num: d.Ano * 100 + d.Mes };
+        agg[key].FOB += (d.FOB || 0);
+        agg[key].COUNT += 1;
+        agg[key].PESO += (d.Peso_Neto_Kg || 0);
+    });
 
-            const sorted = Object.values(agg).sort((a, b) => a.num - b.num);
-            const x = sorted.map(d => d.x);
-            const metricKey = tsMetric === 'COUNT' ? 'COUNT' : (tsMetric === 'PESO' ? 'PESO' : tsMetric);
-            const y = sorted.map(d => d[metricKey]);
+    // Calcular el FOB USD/Kg dinámicamente
+    const sorted = Object.values(agg).sort((a, b) => a.num - b.num).map(d => {
+        d.FOB_KG = d.PESO > 0 ? (d.FOB / d.PESO) : 0;
+        return d;
+    });
 
-            const metricLabels = { FOB: 'FOB (USD)', CIF: 'CIF (USD)', COUNT: 'Registros', PESO: 'Peso Neto (Kg)' };
-            const metricColors = { FOB: '#1e3a8a', CIF: '#059669', COUNT: '#7c3aed', PESO: '#ea580c' };
+    const metricKey = tsMetric === 'COUNT' ? 'COUNT' : (tsMetric === 'PESO' ? 'PESO' : tsMetric);
+    const y = sorted.map(d => d[metricKey]);
 
-            const trace = {
-                x: x, y: y, type: 'scatter', mode: 'lines+markers',
-                line: { color: metricColors[tsMetric], width: 2 },
-                marker: { size: 5, color: metricColors[tsMetric] },
-                fill: 'tozeroy', fillcolor: metricColors[tsMetric] + '33',
-                name: metricLabels[tsMetric],
-                hovertemplate: '%{x}<br>%{y:,.0f}<extra></extra>'
-            };
+    const metricLabels = { FOB: 'FOB (USD)', FOB_KG: 'FOB USD/Kg', COUNT: 'Registros', PESO: 'Peso Neto (Kg)' };
+    const metricColors = { FOB: '#1e3a8a', FOB_KG: '#059669', COUNT: '#7c3aed', PESO: '#ea580c' };
 
-            const layout = {
-                margin: { t: 20, r: 20, b: 50, l: 70 },
-                paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
-                font: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') || '#1a1a2e' },
-                xaxis: { title: 'Periodo', showgrid: true, gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb', tickangle: -45, tickfont: { size: 10 } },
-                yaxis: { title: metricLabels[tsMetric], showgrid: true, gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb', tickformat: ',.0f', tickfont: { size: 10 } },
-                hovermode: 'x unified', showlegend: false
-            };
+    // Ajustar formato para mostrar decimales en el precio por Kg
+    const hoverTemplate = tsMetric === 'FOB_KG' ? '%{x}<br>$%{y:,.3f}/Kg<extra></extra>' : '%{x}<br>%{y:,.0f}<extra></extra>';
+    const yTickFormat = tsMetric === 'FOB_KG' ? '$,.2f' : ',.0f';
 
-            Plotly.newPlot('chart-timeseries', [trace], layout, { responsive: true, displayModeBar: false });
-        }
+    const trace = {
+        x: sorted.map(d => d.x), y: y, type: 'scatter', mode: 'lines+markers',
+        line: { color: metricColors[tsMetric], width: 2 },
+        marker: { size: 5, color: metricColors[tsMetric] },
+        fill: 'tozeroy', fillcolor: metricColors[tsMetric] + '33',
+        name: metricLabels[tsMetric],
+        hovertemplate: hoverTemplate
+    };
+
+    const layout = {
+        margin: { t: 20, r: 20, b: 50, l: 70 },
+        paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+        font: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') || '#1a1a2e' },
+        xaxis: { title: 'Periodo', showgrid: true, gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb', tickangle: -45, tickfont: { size: 10 } },
+        yaxis: { title: metricLabels[tsMetric], showgrid: true, gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e5e7eb', tickformat: yTickFormat, tickfont: { size: 10 } },
+        hovermode: 'x unified', showlegend: false
+    };
+
+    Plotly.newPlot('chart-timeseries', [trace], layout, { responsive: true, displayModeBar: false });
+}
 
         
         // Scatter
