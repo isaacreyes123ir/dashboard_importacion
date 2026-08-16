@@ -132,20 +132,23 @@
         }
         .main-grid {
             display: grid;
-            grid-template-columns: 320px 1fr;
+            grid-template-columns: 1fr; /* Antes decía 320px 1fr */
             gap: 1.5rem;
             padding: 0 1.5rem 1.5rem;
             max-width: 1920px;
             margin: 0 auto;
         }
-        @media (max-width: 1200px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
-            .sidebar {
-                position: static;
-            }
+        
+        .triple-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
         }
+        @media (max-width: 1024px) {
+            .triple-grid { grid-template-columns: 1fr; }
+        }
+        
         .sidebar {
             display: flex;
             flex-direction: column;
