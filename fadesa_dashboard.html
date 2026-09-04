@@ -577,8 +577,8 @@
             const incoterms = [...new Set(data.map(d => d.Incoterm).filter(Boolean))].sort();
             populateSelect('filter-incoterm', incoterms.map(i => ({ value: i, label: i })));
 
-            const marcas = [...new Set(data.map(d => d.Distrito).filter(Boolean))].sort();
-            populateSelect('filter-distrito', distritos.map(d => ({ value: d, label: d })));
+            const marcas = [...new Set(data.map(d => d.Marca).filter(Boolean))].sort();
+            populateSelect('filter-marca', marcas.map(m => ({ value: m, label: m })));
 
             const regimenes = [...new Set(data.map(d => d.Regimen).filter(Boolean))].sort();
             populateSelect('filter-regimen', regimenes.map(r => ({ value: r, label: r })));
