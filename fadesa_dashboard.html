@@ -577,7 +577,7 @@
             const incoterms = [...new Set(data.map(d => d.Incoterm).filter(Boolean))].sort();
             populateSelect('filter-incoterm', incoterms.map(i => ({ value: i, label: i })));
 
-            const distritos = [...new Set(data.map(d => d.Distrito).filter(Boolean))].sort();
+            const marcas = [...new Set(data.map(d => d.Distrito).filter(Boolean))].sort();
             populateSelect('filter-distrito', distritos.map(d => ({ value: d, label: d })));
 
             const regimenes = [...new Set(data.map(d => d.Regimen).filter(Boolean))].sort();
@@ -591,7 +591,7 @@
             document.getElementById('filter-pais').addEventListener('change', updateFilters);
             document.getElementById('filter-incoterm').addEventListener('change', updateFilters);
             document.getElementById('filter-producto').addEventListener('input', debounce(updateFilters, 300));
-            document.getElementById('filter-distrito').addEventListener('change', updateFilters);
+            document.getElementById('filter-marca').addEventListener('change', updateFilters);
             document.getElementById('filter-regimen').addEventListener('change', updateFilters);
             document.getElementById('filter-estado-decl').addEventListener('change', updateFilters);
             document.getElementById('btn-reset').addEventListener('click', resetFilters);
@@ -636,7 +636,7 @@
                 vias: [document.getElementById('filter-via').value],
                 paises: [document.getElementById('filter-pais').value],
                 incoterms: [document.getElementById('filter-incoterm').value],
-                distritos: [document.getElementById('filter-distrito').value],
+                marcas: [document.getElementById('filter-marca').value],
                 regimenes: [document.getElementById('filter-regimen').value],
                 estados: [document.getElementById('filter-estado-decl').value],
                 producto: document.getElementById('filter-producto').value.toLowerCase(),
@@ -654,7 +654,7 @@
                 if (currentFilters.vias[0] !== 'all' && String(d.Via) !== currentFilters.vias[0]) return false;
                 if (currentFilters.paises[0] !== 'all' && String(d.Pais_Origen) !== currentFilters.paises[0]) return false;
                 if (currentFilters.incoterms[0] !== 'all' && String(d.Incoterm) !== currentFilters.incoterms[0]) return false;
-                if (currentFilters.distritos[0] !== 'all' && String(d.Distrito) !== currentFilters.distritos[0]) return false;
+                if (currentFilters.marcas[0] !== 'all' && String(d.Marca) !== currentFilters.marcas[0]) return false;
                 if (currentFilters.regimenes[0] !== 'all' && String(d.Regimen) !== currentFilters.regimenes[0]) return false;
                 if (currentFilters.estados[0] !== 'all' && String(d.Estado_Mercancia) !== currentFilters.estados[0]) return false;
                 if (currentFilters.producto && !String(d.Producto).toLowerCase().includes(currentFilters.producto)) return false;
@@ -671,7 +671,7 @@
                 if (excludeFilter !== 'vias' && currentFilters.vias[0] !== 'all' && String(d.Via) !== currentFilters.vias[0]) return false;
                 if (excludeFilter !== 'paises' && currentFilters.paises[0] !== 'all' && String(d.Pais_Origen) !== currentFilters.paises[0]) return false;
                 if (excludeFilter !== 'incoterms' && currentFilters.incoterms[0] !== 'all' && String(d.Incoterm) !== currentFilters.incoterms[0]) return false;
-                if (excludeFilter !== 'distritos' && currentFilters.distritos[0] !== 'all' && String(d.Distrito) !== currentFilters.distritos[0]) return false;
+                if (excludeFilter !== 'marcas' && currentFilters.marcas[0] !== 'all' && String(d.Marca) !== currentFilters.marcas[0]) return false;
                 if (excludeFilter !== 'regimenes' && currentFilters.regimenes[0] !== 'all' && String(d.Regimen) !== currentFilters.regimenes[0]) return false;
                 if (excludeFilter !== 'estados' && currentFilters.estados[0] !== 'all' && String(d.Estado_Mercancia) !== currentFilters.estados[0]) return false;
                 if (currentFilters.producto && !String(d.Producto).toLowerCase().includes(currentFilters.producto)) return false;
@@ -685,7 +685,7 @@
                 'filter-via': { key: 'vias', field: 'Via' },
                 'filter-pais': { key: 'paises', field: 'Pais_Origen' },
                 'filter-incoterm': { key: 'incoterms', field: 'Incoterm' },
-                'filter-distrito': { key: 'distritos', field: 'Distrito' },
+                'filter-marca': { key: 'marcas', field: 'Marca' },
                 'filter-regimen': { key: 'regimenes', field: 'Regimen' },
                 'filter-estado-decl': { key: 'estados', field: 'Estado_Mercancia' }
             };
@@ -711,7 +711,7 @@
         }
 
         function resetFilters() {
-            ['filter-year', 'filter-via', 'filter-pais', 'filter-incoterm', 'filter-distrito', 'filter-regimen', 'filter-estado-decl'].forEach(id => {
+            ['filter-year', 'filter-via', 'filter-pais', 'filter-incoterm', 'filter-marca', 'filter-regimen', 'filter-estado-decl'].forEach(id => {
                 document.getElementById(id).value = 'all';
             });
             document.getElementById('filter-producto').value = '';
