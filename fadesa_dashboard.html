@@ -75,6 +75,8 @@
             color: var(--text);
             font-size: 0.75rem; /* Fuente más pequeña */
             min-width: 110px; /* Ancho mínimo reducido */
+            max-width: 140px; /* Evita que el cajón se expanda demasiado */
+            text-overflow: ellipsis; /* Corta el texto largo con "..." */
             cursor: pointer;
         }
         .filter-group select:focus, .filter-group input:focus {
