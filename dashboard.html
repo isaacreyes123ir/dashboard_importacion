@@ -514,7 +514,7 @@
         async function loadData() {
             showLoading();
             try {
-                const response = await fetch('dashboard_data.json?v=' + Date.now());
+                const response = await fetch('fadesa_dashboard_data.json?v=' + Date.now());
                 rawData = await response.json();
                 
                 // Cargar datos DuPont
